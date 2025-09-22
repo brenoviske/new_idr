@@ -1,0 +1,422 @@
+#============================
+# IMPORTING THE DEPENDENCIES
+#============================
+
+from flask import Flask, jsonify, request , render_template , redirect, url_for # To help me render and manipulta the routes   # For constructing the Data Base
+from sqlalchemy import or_
+from sklearn.linear_model import LinearRegression # This library right here will be used for a Machine Learning Analysis
+from datetime import datetime# For dating storing
+import numpy as np # For array manipulation
+from collections import Counter
+
+# Importing the ORM from the models file
+from models import Patient # Importing the table
+from extensions import db
+
+# To load enviroment variables
+from dotenv import load_dotenv # Loading the variables from the .env file
+import os 
+
+load_dotenv()
+
+ADMIN_USER = os.environ.get('ADMIN_USER')
+ADMIN_PASS = os.environ.get('ADMIN_PASSWORD')
+
+DB_USER = os.environ.get('DB_USER')
+DB_PASS = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_NAME = os.environ.get('DB_NAME')
+
+
+SECRET_KEY = os.environ.get("SECRET_KEY", 'dev_secret_key') # Fallback para dev
+
+#====================================
+# INITIALIZING  THE FLASK APPLICATION
+#====================================
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:Ivimorcega1@localhost:3306/IMERSA' # Creating the database and linking eith the enviroment keys
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = SECRET_KEY
+
+db.init_app(app)
+
+#===============
+# LOGIN SCREEN
+#===============
+
+@app.route("/", methods = ['POST','GET'])
+def login():
+
+    if request.method == 'POST':
+        
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            return redirect(url_for('homepage'))
+    return render_template('index.html')
+
+#=================
+# HOMEPAGE SCREEN 
+#=================
+
+@app.route("/main.html", methods = ['GET','POST'])
+def homepage():
+
+    #-- Gathering all the patients from the table --#
+    patients = Patient.query.all()
+    
+    incomes = [ pt.income for pt in patients if pt.income is not None]
+    
+
+    #Initializing some counting variables
+
+    surgeries = str(0)
+    consults = str(0)
+
+    # Financial Informations 
+    max_revenue = str(0)
+    min_revenue = str(0)
+    mean_revenue = str(0)
+    total_revenue = str(0)
+    month_revenue = str(0)
+ 
+    num_patients = (Patient.query.count())
+
+    if num_patients > 0:
+
+        # Getting data from the patients morality
+        surgeries = Patient.query.filter(Patient.modality.ilike('%Cirurgia%')).count()
+        consults = Patient.query.filter(Patient.modality.ilike('%Consulta%')).count()
+
+        # Getting data referent to the financial balance from the clinic itself
+
+        max_revenue = max(incomes)
+        min_revenue = min(incomes )
+
+        total_revenue = sum(incomes)
+        mean_revenue = total_revenue / num_patients
+
+        now = datetime.utcnow()
+
+        month_revenue = (
+            db.session.query( db.func.sum(Patient.income))
+            .filter(db.extract('year',Patient.created_at) == now.year)
+            .filter(db.extract('month',Patient.created_at) == now.month)
+        ).scalar() or 0 
+
+    elif num_patients == 0:
+        num_patients = str(num_patients)
+        
+    
+
+
+    return render_template('main.html', 
+            patients = patients,
+            num_patients = num_patients
+            ,surgeries = surgeries , 
+            consults = consults,
+            max_revenue = max_revenue,
+            min_revenue = min_revenue,
+            total_revenue = total_revenue,
+            mean_revenue = mean_revenue,
+            month_revenue = month_revenue,
+            )
+
+
+
+#========================
+# AGE DISTRIBUTION ROUTE
+#========================
+
+@app.route('/api/age-distribution')
+def ageDistribution():
+
+    ages = [ pt.age for pt in Patient.query.all() if pt.age is not None] # Fetching all the ages from the patients data
+   
+    # Defining bins in a dict to store the intervals of the patients ages
+
+    bins = {
+        '0-18': 0,
+        '19-35': 0,
+        '36-50': 0,
+        '51-65': 0,
+        '66+': 0
+    }
+
+    # Now counting the patients in each bin
+    for age in ages:
+        if age <= 18: bins['0-18'] +=1
+        elif age <= 35 : bins['19-35'] +=1
+        elif age <= 50: bins['36-50'] +=1
+        elif age <= 65: bins['51-65'] +=1
+        else:bins['66+'] +=1
+
+    return jsonify({
+        'labels': list(bins.keys()),
+        'values': list(bins.values())
+    })
+
+
+#=======================
+# STATUS RELATION ROUTE
+#=======================
+
+@app.route('/api/status-distribution')
+def statusRelation():
+
+    patients = Patient.query.all()
+
+    confirmed = sum(1 for pt in patients if pt.status.lower()== 'confirmado')
+    standby = sum (1 for pt in patients if pt.status.lower() == 'pendente')
+
+
+    return jsonify({ 'labels': ['Confirmado','Pendente'],
+                    'values': [ confirmed, standby]
+    })
+
+
+@app.route('/api/gender-distribution')
+def genderDistribution():
+
+    women = sum(1 for pt in Patient.query.all() if pt.gender.lower() == 'feminino')
+    men = sum(1 for pt in Patient.query.all() if pt.gender.lower() == 'masculino')
+
+    return jsonify({ 'labels': ['Feminino','Masculino'],
+                    'values': [ women , men ]
+    })
+
+#=================
+# MONTHLY REVENUE 
+#=================
+
+@app.route("/api/monthly-revenue")
+def monthly_revenue():
+
+    now = datetime.utcnow()
+    month_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] # Making the 
+    monthly_revenues = []
+
+
+    for month in range(1,13,1):
+        total = (
+            db.session.query(db.func.sum(Patient.income))
+            .filter(db.extract('year', Patient.created_at) == now.year)
+            .filter(db.extract('month',Patient.created_at) == month)
+        ).scalar() or 0
+
+        monthly_revenues.append( float(total))
+
+    return jsonify({'labels': month_labels,
+                    'values':monthly_revenues,
+    })
+
+#==========================
+# AI PREDICTION OUTCOMES
+#==========================
+
+@app.route('/api/current-predicted-revenue')
+def current_predicted_revenue():
+    
+    now = datetime.utcnow()
+    current_month = now.month
+
+    current_revenue = (
+        db.session.query(db.func.sum(Patient.income))
+        .filter(db.extract('year',Patient.created_at) == now.year)
+        .filter(db.extract('month',Patient.created_at) == current_month)
+    ).scalar() or 0
+
+    current_revenue = float(current_revenue)
+
+    # Prepare data for prediction ( train on past months )
+
+    past_months = []
+    revenues = []
+
+    for month in range(1, current_month+1 ):
+        
+        total = (
+            db.session.query(db.func.sum(Patient.income))
+            .filter(db.extract('year', Patient.created_at) == now.year)
+            .filter(db.extract('month', Patient.created_at) == month)
+        ).scalar() or 0
+
+        past_months.append(month)
+        revenues.append(float(total))
+
+    if len(past_months) > 1:
+        X = np.array(past_months).reshape(-1,1)
+        y = np.array(revenues)
+        model = LinearRegression().fit( X , y)
+        predicted_revenue = float(model.predict([[current_month +1]]))
+
+    else:
+        # Not enough data for prediction
+        predicted_revenue = 0.0
+    
+
+    
+    # Predict the outcome from the next month analyzing the data already avaiable
+
+    return jsonify({
+        'labels': ['Mês Atual','Próximo mês(Previsão Financeira)'],
+        'values': [current_revenue, predicted_revenue]
+    })
+    
+
+#========================
+# SERVICE REALTION ROUTE
+#========================
+
+@app.route('/api/service-distribution')
+def serviceRelation():
+
+    patients = Patient.query.all() # Selecting all the patients 
+
+    service_counts = Counter( pt.service.lower() for pt in patients )
+
+    return jsonify({
+        'labels': list(service_counts.keys()),
+        'values': list(service_counts.values())
+    }) # Returning as a json format
+    
+#=============================
+# ADD PATIENT ROUTE
+#=============================
+
+@app.route("/add_patient", methods = ['POST','GET'])
+def add_patient():
+
+    if request.method == 'POST':
+        form_data = request.form.to_dict()
+        # Getting specific data from the template formulary
+        cpf = form_data.get('cpf')
+        name = form_data.get('name')
+
+        if not cpf or len(cpf) != 11: return jsonify({'status':'error','message':'CPF inválido(precisa ter 11 digítos)'})
+
+        patient_cpf = Patient.query.filter_by(cpf = cpf).first() 
+        patient_name = Patient.query.filter_by(name = name).first()
+
+        # Making the verification to see if the patient already exists in the Database by eitther using its name or cpf(primary key identification)
+        if patient_cpf or patient_name:
+            return jsonify({'status':'error','message': 'Paciente já existe em nosso banco de dados'})
+        else:
+            try:
+                schedule_date_str = form_data.pop("schedule_date", None)
+                schedule_date = None
+            
+                if schedule_date_str :
+                    schedule_date = datetime.strptime(schedule_date_str,'%Y-%m-%d').date()
+
+                new_patient = Patient(**form_data, schedule_date = schedule_date)
+                db.session.add(new_patient)
+                db.session.commit()
+
+                return jsonify({'status': 'success'})
+            
+            except Exception as e:
+                db.session.rollback()
+                print(f'Error:{e}')
+                return jsonify({'status':'error' , 'message' : 'Erro ao adicionar paciente'})
+
+    return render_template('main.html')
+
+
+
+#======================
+# SEARCH PATIENT ROUTE
+#======================
+
+@app.route('/search_patient', methods = ['GET'])
+def search_patient():
+    query = request.args.get('q','').strip()
+
+
+    if not query: 
+        patients = Patient.query.all()
+
+    patients = Patient.query.filter(
+        or_(
+            Patient.cpf.ilike(f'%{query}%'),
+            Patient.name.ilike(f'%{query}%')
+        )
+    ).all()
+
+    if patients:
+        # Gathering the data from the patient to set upon the patient card
+
+       return jsonify([{
+           'cpf': pt.cpf,
+           'name': pt.name,
+           'modality': pt.modality,
+           'status': pt.status,
+           'age': pt.age,
+           'service': pt.service,
+           'income': pt.income,
+           'gender': pt.gender,
+           'schedule_date': pt.schedule_date.isoformat() if pt.schedule_date else None,
+           'created_at': pt.created_at.isoformat() if pt.created_at else None
+       } for pt in patients])
+    
+    else :
+        return  jsonify({'status':'error','message':'Paciente não encontrado '}), 404
+    
+
+#=========================
+# UPDATE ROUTE
+#=========================
+@app.route('/update/<cpf>' ,  methods = ['POST','GET'])
+def update(cpf):
+    
+    patient = Patient.query.get_or_404(cpf)
+    if request.method == 'POST':
+
+        data = request.form.to_dict()
+        
+        try:
+            for key, value in data.items():
+                if hasattr(patient,key):
+                    setattr( patient,key,value)
+            db.session.commit()
+            return redirect(url_for('homepage'))
+        except Exception as e:
+            db.session.rollback()
+            print(f'Error:{e}')
+            
+            return f'There was an issue on trying to update your patient'
+    
+    return render_template('main.html',data = patient.to_dict(), patient = patient)
+    
+
+#=========================
+# DELETE ROUTE
+#=========================
+
+@app.route("/delete/<cpf>", methods =['POST','GET'])
+def delete(cpf):
+    try:
+        patient = db.session.query(Patient).filter_by(cpf=str(cpf)).first()
+        if patient:
+            db.session.delete(patient)
+            db.session.commit()
+            return jsonify ({ 'status' : 'success'})
+        return jsonify({'status':'error', 'message':'Paciente não encontrado'}), 404
+    except Exception as e:
+        db.session.rollback()
+        print(f'Erro ao deletar o paciente:{e}')
+        return jsonify({ 'status' : 'error' , 'message':'Erro ao deletar paciente'}) , 500
+
+
+
+#=========================
+# EXECUTING THE SCRIPT
+#=========================
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug = True, host='127.0.0.1', port=5000)
+    

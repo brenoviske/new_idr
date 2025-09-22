@@ -1,0 +1,10 @@
+.env # Ignoring .env with variable enviroments
+env/ # Ignoring virtual enviroment
+
+
+#Cache em python 
+__pycache__/
+
+
+# Ignoring the .idea file
+.idea/

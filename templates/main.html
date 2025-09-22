@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDr-Homepage</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body class="p-0 m-0 bg-white scroll-smooth">
+    <header class="flex flex-row items-center justify-center p-[20px] border-b-2 border-blue-600 w-full h-[50x] z-50 fixed bg-white top-0 left-0 shadow-md">
+
+        <!-- Navegation Bar -->
+
+        <nav class="flex flex-row justify-between items-center w-full">
+
+            <!-- Left container from the navegation bar -->
+
+            <div class="nav-left flex flex-row items-center justify-center gap-[20px]">
+                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="w-[50px] h-[50px]">
+                <p class="font-lighter text-[20px] text-blue-600 font-mono">Bem-Vindo,Imersa</p>
+            </div>
+
+            <!-- Right container from the navegation bar -->
+
+            <div class="flex flex-row justify-center items-center gap-[60px]">
+                <a href="#patientSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Pacientes</a>
+                <a href="#dashboardSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Visão Geral</a>
+                <a href="#financialSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Financeiro</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <!-- Patients Sector -->
+        <section id="patientSection"  class="flex flex-row align-center justify-center gap-[100px] mt-[140px]">
+
+            <div class="flex flex-col items-center justify-start gap-[20px]">
+                <h1 class="text-[70px] text-blue-600 font-bold font-ubuntu font-mono">Pacientes</h1>
+                <p class="text-[20px] font-ubuntu font-bold">Adicione,edite e delete seus pacientes. <br> Os dados de seus pacientes estarão armazenados na tabela ao lado.</p>
+                <button id="openDialog"  class="text-white border-2 border-blue-600 font-bold font-ubuntu bg-gradient-to-r from-blue-600 to-blue-900 rounded-[10px] p-[20px] hover:bg-white hover:text-blue-600 hover:from-white hover:to-white">&plus;Adicionar Paciente</button>
+            </div>
+
+            <!-- Here it is the modal pop-up responsible for getting the adding patient form -->
+
+            <dialog id="addPatient" class=" rounded-2x1 shadow-lg w-[600px] h-[700px] p-[20px] rounded-[10px]">
+
+                <h2 class="font-bold text-blue-600 text-[25px]">Adicionar Paciente</h2>
+
+                <form action="{{ url_for('add_patient') }}" method="POST" class="flex flex-col items-center justify-center gap-[20px] mt-[40px]" id="addForm">
+                    <input type="text" placeholder="Digite o CPF do paciente" name="cpf" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite o sexo do paciente" name="gender" class="w-[500px] border-2 p-[10px] rounded-[10px]"">
+                    <input type="text" placeholder="Digite o status do paciente(Confirmado ou Pendente)" name="status" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite o tipo de serviço a ser realizado(Rinnoplastia,Lipoaspiração)" class="w-[500px] border-2 p-[10px] rounded-[10px]" name="service">
+                    <input type="date" placeholder="Digite a data a agendar este paciente" name="schedule_date" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    <input type="text" placeholder="Digite a quantidade a ser paga pelo paciente" name="income" class="w-[500px] border-2 p-[10px] rounded-[10px]">
+                    
+                    <!-- Creating the container to store the submit and the cancel button on this Dialog -->
+
+                    <div class=" flex flex-row items-center justify-center gap-[40px]">
+                        <button type="button"  id="closeDialog" type="button" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Cancelar</button>
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Adicionar</button>
+                    </div>
+
+                    <!-- Displaying the result inside the modal pop up after the verification is executed -->
+                    <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
+                </form>
+            </dialog>
+            
+            <!-- Here is where the table patients will be located-->
+
+            <div class="w-[900px] h-[500px] border-2 rounded-[10px] shadow-md overflow-y-auto ">
+                <div class="flex flex-row items-start justify-between p-[20px] border-b  ">
+                    <h2 class="text-blue-600 text-[22px] font-bold">Pacientes</h2>
+                    <input type="text" placeholder="Busque paciente por CPF ou Nome" class="w-[300px] rounded-[10px] border-2 p-[10px]" id="searchInput">
+                </div>
+                <div class="flex flex-col items-center justify-start mt-[20px] gap-[30px]" id="patientsContainer">
+
+                  <!-- JavaScript will render automatically the patients cards -->
+            </div>
+        </section>
+
+        <!--This section will be uploading the general dashboard from the clinic itself-->
+
+        <section id="dashboardSection"  class="flex flex-col items-center justify-center mt-[100px] bg-gray-100 p-[80px] rounded-[50px]">
+            <!-- Starting the general dashboard container section -->
+
+            <h2 class="text-blue-600 text-[70px] font-bold font-mono mt-[40px]">Visão Geral</h2>
+            <div class="flex flex-row items-center justify-center mt-[100px] gap-[60px]">
+                <div class="w-[300px] h-[250px] rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900  p-[20px] shadow-md duration-[500ms] hover:scale-[1.15] ease-in-out">
+                    <p class="font-bold font-ubuntu text-white text-[30px]">Pacientes</p>
+                    {% if num_patients %}
+                        <label class="text-white text-[40px] font-bold">{{ num_patients }}</label>
+                    {% endif %}
+                </div>
+                <div class=" w-[300px] h-[250px] rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
+                    <p class="font-bold font-ubuntu text-white text-[30px]">Cirurgias</p>
+                    {% if surgeries %}
+                        <label class="text-white text-[40px] font-bold">{{ surgeries }}</label>
+                    {% endif %}
+                </div>
+                <div class="rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] w-[300px] h-[250px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
+                    <p class="font-bold font-ubuntu text-white text-[30px]">Consultas</p>
+                    {% if consults %}
+                        <label class="text-white text-[40px] font-bold">{{ consults }}</label>
+                    {% endif %}
+                </div>
+                <div class=" rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] w-[300px] h-[250px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
+                    <p class="font-bold font-ubuntu text-white text-[30px]"> Receita Mensal </p>
+                    {% if month_revenue %}
+                        <label class="text-white text-[40px] font-bold">{{ month_revenue }}</label>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex flex-row items-center justify-center gap-[25px] mt-[50px]"> <!-- This div right here it is the flex div, that control the child elements inside of it-->
+
+                <!-- This will display information from the patients average -->
+                <div class="h-[400px] w-[400px] border-2 rounded-[10px] shadow-md border-white">
+                    <div class="flex flex-row items-start align-start border-b-2 border-white">
+                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Média de Idade</h2>
+                    </div>
+                    <div class="flex justify-center items-center">
+                    <!-- Age Pie Chart -->
+                        <canvas id="ageChart" width="380" height="300" >
+                        </canvas>
+                    </div>
+                </div>
+
+                <div class="h-[400px] w-[400px] border-2 rounded-[10px] shadow-md border-white">
+                    <div class="flex flex-row border-b border-white align-start items-start">
+                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]"> Distribuição de Status </h2>
+                    </div>
+
+                    <!-- Status relation Chart -->
+                    <div class="flex items-center justify-center">
+                        <canvas id="statusChart" width="380" height="300">
+                        </canvas>
+                    </div>
+                </div>
+                
+                <div class="h-[400px] h-[400px] border-2 rounded-[10px] shadow-md border-white">
+                    <div class="flex flex-row border-b border-white align-start items-start">
+                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]"> Distribuição de Serviços </h2>
+                    </div>
+                    
+                    <div class="flex items-center justify-center">
+                        <canvas id="serviceChart" width="380" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="h-[400px] h-[400px] border-2 rounded-[10px] shadow-md border-white">
+                    <div class="flex flex-row border-b border-white align-start items-start">
+                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Distribuição por genêro</h2>
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <canvas id="genderChart" height="300" width="380"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Financial Sector of the Clinic -->
+        <section id="financialSection"  class="flex flex-col items-center justify-center mt-[60px]">
+            <!-- Introducing the headertag for the financial market of the clinic -->
+            <h1 class="font-mono font-bold text-blue-600 text-[60px]">Financeiro</h1>
+            <div class="flex flex-row items-center justify-center mt-[40px] gap-[50px]">
+                <!-- Financial Indexes Section -->
+                <div class="w-[300px] h-[250px] rounded-[10px] shadow-md border-2 p-[20px] hover:scale-[1.15] duration-[500ms] ease-in-out  flex flex-col items-start justify-start  text-[30px]"> <!-- Each one of these -->
+                    <p class="font-bold text-blue-600 text-[30px]">Receita Máxima</p>
+                    {% if max_revenue %}
+                        <label class="font-bold text-blue-600">{{ max_revenue }}</label>
+                    {% endif %}
+                </div>
+                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start  text-[30px]">
+                    <p class="font-bold text-blue-600 text-[30px]"> Receita Mínima </p>
+                    {% if min_revenue %}
+                        <label class="font-bold text-blue-600">{{ min_revenue }}</label>
+                    {% endif %}
+                </div>
+                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start  text-[30px]">
+                    <p class="font-bold text-blue-600 text-[30px]"> Receita Média </p>
+                    {% if mean_revenue %}
+                        <label class="font-bold text-blue-600">{{ mean_revenue }}</label>
+                    {% endif %}
+                </div>
+                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start text-[30px]">
+                    <p class="font-bold text-blue-600 text-[30px]"> Receita Total </p>
+                    {% if total_revenue %}
+                        <label class="font-bold text-blue-600">{{ total_revenue }}</label>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- This section will display graphic informations regarding the financial balance of the clinic right here -->
+            <div class="flex flex-row items-center justify-center mt-[50px] gap-[50px]">
+
+                <div class="w-[700px] h-[500px] border-2 rounded-[10px] shadow-md"> <!--  --> 
+                    <div class="flex flex-row items-start justify-start border-b">
+                        <h2 class="font-bold text-blue-600 p-[20px] text-[20px]"> Desempenho Mensal </h2>
+                    </div>
+                    <!-- Monthly Revenue Chart -->
+                    <canvas id="revenueChart" width="700" height="400"> <!-- Creating the canvas fot the Chart -->
+                    </canvas>
+                </div>
+
+                <!-- This div will be displaying -->
+                <div class="rounded-[10px] border-2 w-[500px] h-[500px] shadow-md">
+                    <div class="flex flex-row items-start justify-start border-b">
+                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Previsão Mensal Eventual </h2>
+                    </div>
+
+                    <!-- Revenue Prediction Outcome -->
+                    <canvas id="predictionChart" width="480" height="400">
+                    </canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Adding a footer section to the mainpage , to make it better looking -->
+
+        <footer class="bg-gradient-to-r from-blue-600 to-blue-900 w-full h-[300px] mt-[150px]">
+
+            <div class="flex flex-row items-start justify-between p-[20px] gap-[30px]">
+                
+                <div class="flex flex-col items-center justify-center p-[20px]">
+                    <p class="text-white font-lighter">Qualquer ferramenta ou imagem utilizada neste programa é de caráter ilustatrivo.</p>
+                    <p class="text-white font-lighter">Todos os dados coletados e exibidos são pertencentes aos clientes.</p>
+                    <p class="text-white font-lighter">Favor não fazer uso ou o comaprtilhamento para terceiros.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-[20px]">
+                    <p class="text-white font-lighter">Todos os direitos reservados à @brenoviske.</p>
+                    <p class="text-white font-lighter">Contact: reisb6774@gmail.com</p>
+                </div>
+
+            </div>
+        </footer>
+
+    </main>
+</body>
+<script>
+
+    // -------------------- Modal Management --------------------
+  const openDialog = document.getElementById('openDialog');
+  const addDialog = document.getElementById('addPatient');
+  const closeDialog = document.getElementById('closeDialog');
+
+  const editButtons = document.querySelectorAll('.updateDialog');
+  const updateDialogs = document.querySelectorAll('.updatePatient');
+  const closeButtons = document.querySelectorAll('.closeUpdate');
+
+  // Open and close add patient modal
+  openDialog.addEventListener('click', () => addDialog.showModal());
+  closeDialog.addEventListener('click', e => {
+    e.preventDefault();
+    addDialog.close();
+  });
+
+  // Open and close update patient modals
+  editButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => updateDialogs[index].showModal());
+  });
+  closeButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => updateDialogs[index].close());
+  });
+
+  // -------------------- Add Patient --------------------
+  const form = document.getElementById('addForm');
+  const verificationMessage = document.getElementById('verificationMessage');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch('/add_patient', {
+        method: 'POST',
+        body: new URLSearchParams(data)
+      });
+      const result = await response.json();
+
+      if (result.status === 'error') {
+        verificationMessage.textContent = result.message;
+        verificationMessage.classList.remove('hidden');
+      } else if (result.status === 'success') {
+        window.location.reload() // or you can dynamically reload lists
+      }
+    } catch (err) {
+      console.error(err);
+      verificationMessage.textContent = 'Erro ao enviar o formulário';
+      verificationMessage.classList.remove('hidden');
+    }
+  });
+
+  // -------------------- Patient Rendering --------------------
+  const searchInput = document.getElementById('searchInput');
+  const patientsContainer = document.getElementById('patientsContainer');
+  const cardsContainer = document.getElementById('todayPatientsCards');
+
+
+  async function loadPatients(query = '') {
+    try {
+      const res = await fetch(`/search_patient?q=${encodeURIComponent(query)}`);
+      const patients = await res.json();
+      renderPatients(patients);
+    } catch (err) {
+      console.error('Erro na busca:', err);
+    }
+  }
+
+
+  searchInput.addEventListener('input', () => loadPatients(searchInput.value.trim()));
+
+  function renderPatients(patients) {
+    patientsContainer.innerHTML = '';
+    if (!patients || patients.length === 0) {
+      patientsContainer.innerHTML = `<p class="text-gray-600 font-bold">Nenhum paciente encontrado</p>`;
+      return;
+    }
+
+    patients.forEach(pt => {
+      const card = document.createElement('div');
+      card.className = 'flex flex-row items-center justify-center bg-gradient-to-r from-blue-600 to-blue-900 rounded-[10px] p-[20px] w-[850px] gap-[40px]';
+      card.innerHTML = `
+        <div class="flex flex-col items-center justify-center">
+          <p class="font-bold text-white">Nome: ${pt.name}</p>
+          <p class="font-bold text-white">CPF: ${pt.cpf}</p>
+          <p class="font-bold text-white">Modalidade: ${pt.modality || ""}</p>
+        </div>
+        <div class="flex flex-col items-center justify-center">
+          <p class="font-bold text-white">Status: ${pt.status || "Não informado"}</p>
+          <p class="font-bold text-white">Idade: ${pt.age || "Não informado"}</p>
+          <p class="font-bold text-white">Receita: R$ ${pt.income || "Não informado"}</p>
+        </div>
+        <div class="flex flex-col items-center justify-center">
+          <p class="text-white font-bold">Marcado: ${pt.schedule_date || "Não informado"}</p>
+          <p class="text-white font-bold">Serviço: ${pt.service || "Não informado"}</p>
+          <p class = 'text-white font-bold'>Sexo : ${pt.gender || 'Não informado'} </p>
+        </div>
+        <div class="flex flex-col items-center justify-center gap-[20px]">
+          <button class="editBtn bg-white p-[10px] rounded-[10px] font-bold">Editar</button>
+          <a href="#" class="bg-gradient-to-r from-red-600 to-red-900 text-white p-[10px] rounded-[10px] deleteLink">Deletar</a>
+        </div>
+      `;
+
+      // Cria o dialog modal dinamicamente
+      
+      const updateDialog = document.createElement('dialog')
+      updateDialog.className = 'updatePatient shadow-lg rounded-[10px] w-[600px] h-[700px]'
+      updateDialog.innerHTML = `
+        <h2 class="font-bold text-[20px] p-[20px] text-blue-600">Atualizar Paciente</h2>
+        <form action="/update/${pt.cpf}" method="POST" class="flex flex-col items-center justify-center gap-[40px] mt-[40px]">
+            <input type="text" name="cpf" value="${pt.cpf || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="text" name="name" value="${pt.name || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="text" name="age" value="${pt.age || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="text" name="modality" value="${pt.modality || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="text" name="gender" value="${pt.gender || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]"
+            <input type="text" name="status" value="${pt.status || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="date" name="schedule_date" value="${pt.schedule_date || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+            <input type="text" name="income" value="${pt.income || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
+          <div class="flex flex-row items-center justify-center gap-[40px]">
+            <button type="button" class="closeUpdate bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Cancelar</button>
+            <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Atualizar</button>
+          </div>
+        </form>
+    `;
+
+      // Adding card and dialog modal
+      patientsContainer.appendChild(card);
+      patientsContainer.appendChild(updateDialog)
+
+      // Edit button
+      card.querySelector('.editBtn').addEventListener('click', () => {
+        updateDialog.showModal();
+      });
+
+      // Event listener para fechar modal
+      updateDialog.querySelector('.closeUpdate').addEventListener('click', () =>{
+        updateDialog.close()
+      });
+
+      // Delete button
+      card.querySelector('.deleteLink').addEventListener('click', async e => {
+        e.preventDefault();
+        await deletePatient(pt.cpf,card);
+      });
+    });
+  }
+
+
+  // -------------------- Delete Patient --------------------
+
+  async function deletePatient(cpf, cardElement) {
+  try {
+    const res = await fetch(`/delete/${cpf}`, { method: 'POST' });
+    const result = await res.json();
+
+    if (result.status === 'success') {
+      // 1. Remove the deleted patient card
+      if (cardElement) cardElement.remove();
+
+      // 3. Refresh the patients list dynamically
+      await loadPatients(searchInput.value.trim());
+
+      // 4. Refresh charts/dashboard
+      await refreshDashboard();
+
+    } else {
+      alert('Erro ao deletar paciente: ' + (result.message || ''));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao deletar paciente');
+  }
+}
+
+  // -------------------- Dashboard & Charts --------------------
+
+
+  window.charts = window.charts || {};
+
+    async function createChart(canvasId, apiUrl, type, options = {}) {
+    try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+    // Destroy previous chart if it exists
+    if (window.charts[canvasId]) {
+      window.charts[canvasId].destroy();
+    }
+
+    // Create new chart and store it in the global object
+    window.charts[canvasId] = new Chart(ctx, {
+      type: type,
+      data: {
+        labels: data.labels || [],
+        datasets: [{
+          label: options.label || '',
+          data: data.values || [],
+          backgroundColor: options.backgroundColor || generateColors(data.values.length),
+          borderColor: options.borderColor || generateColors(data.values.length),
+          borderWidth: options.borderWidth || 1
+        }]
+      },
+      options: {
+        responsive : false,
+        maintainAspectRatio : false
+      }
+    });
+
+  } catch (err) {
+    console.error(`Error creating chart ${canvasId}:`, err);
+  }
+}
+
+
+  async function refreshDashboard() {
+    try {
+
+      // Refresh charts
+      await createChart('ageChart', '/api/age-distribution', 'pie', { title: 'Distribuição por Idade' });
+      await createChart('statusChart', '/api/status-distribution', 'bar', { label: 'Status dos Pacientes' });
+      await createChart('serviceChart', '/api/service-distribution', 'pie', { title: 'Pacientes por Serviços' });
+      await createChart('genderChart' , '/api/gender-distribution', 'bar', { label:'Pacientes por Gênero'});
+      await createChart('revenueChart', '/api/monthly-revenue', 'bar', { title: 'Receita total Mensal por Ano', label: 'Receitas Mensais', scales: { y: { beginAtZero: true } } });
+      await createChart('predictionChart', '/api/current-predicted-revenue', 'bar', {
+        label: 'Receitas',
+        backgroundColor: ['rgba(54,162,235,0.5)', 'rgba(255,99,132,0.5)'],
+        borderColor: ['rgba(54,162,235,1)', 'rgba(255,99,132,1)'],
+        borderWidth: 1,
+        scales: { y: { beginAtZero: true } }
+      });
+    } catch (err) {
+      console.error("Erro ao atualizar dashboard:", err);
+    }
+  }
+
+  function generateColors(n) {
+    const colors = [];
+    for (let i = 0; i < n; i++) {
+      const hue = i * (360 / n);
+      colors.push(`hsl(${hue}, 70%, 60%)`);
+    }
+    return colors;
+  }
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshDashboard();
+    loadPatients();
+  
+ });
+
+
+</script>
+</html>

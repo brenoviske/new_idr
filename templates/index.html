@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDr-Login</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.png')}}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-0 m-0 bg-white">
+    <main class="flex flex-col items-center justify-center mt-[100px]">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="w-[250px] h-[250px]">
+        <section class="w-[400px] h-[300px] flex flex-col items-center border-2 justify-center bg-white p-[20px] gap-[30px] border-2 shadow-md rounded-[10px]">
+            <h2 class="text-blue-600 font-bold text-[25px]">Login</h2>
+            <form action="{{ url_for('login') }}" method="POST">
+                <input type="text" name="username" placeholder="Username" class="border border-blue-600 p-2 mb-2 w-full" required>
+                <input type="password" name="password" placeholder="Password" class="border border-blue-600 p-2 mb-2 w-full" required>
+                <button type="submit" class="bg-blue-600 text-white p-2 w-full">Login</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>
