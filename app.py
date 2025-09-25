@@ -2,7 +2,7 @@
 # IMPORTING THE DEPENDENCIES
 #============================
 
-from flask import Flask, jsonify, request , render_template , redirect, url_for # To help me render and manipulta the routes   # For constructing the Data Base
+from flask import Flask, jsonify, request , render_template , redirect, url_for,session # To help me render and manipulta the routes   # For constructing the Data Base
 from sqlalchemy import or_
 from sklearn.linear_model import LinearRegression # This library right here will be used for a Machine Learning Analysis
 from datetime import datetime# For dating storing
@@ -11,6 +11,7 @@ from collections import Counter
 
 # Importing the ORM from the models file
 from models import Patient # Importing the table
+from models import User
 from extensions import db
 
 # To load enviroment variables
@@ -49,23 +50,85 @@ db.init_app(app)
 def login():
 
     if request.method == 'POST':
-        
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        if username == ADMIN_USER and password == ADMIN_PASS:
-            return redirect(url_for('homepage'))
+        form_data = request.form.to_dict()
+        existing_user = User.query.filter_by(email = form_data.get('email'), password = form_data.get('password')).first()
+        if not existing_user : return jsonify({'status':'error','message':'Credencias inválidas'})
+        else:
+            session['user_email'] = existing_user.email
+            return jsonify({'status':'success'})
     return render_template('index.html')
+
+
+#======================
+# SIGN UP ROUTE
+#======================
+
+@app.route('/signup', methods = ['GET','POST'])
+def signup(): 
+    
+    if request.method == 'POST':
+        data = request.form.to_dict()
+
+        email = data.get('email')
+
+        existing_user  = db.session.query(User).filter_by(email = email).first()
+
+        if existing_user :
+            return jsonify ({'status':'error','message': 'Usúario já existente em nosso banco de dados'})
+        else:
+            try:
+                new_user = User(**data)
+                db.session.add(new_user)
+                db.session.commit()
+                return jsonify({'status':'success'})
+            
+            except Exception as e:
+                print(f'Error:{e}')
+                return jsonify({'status':'error','message':'There was an issue on trying to add the user'})
+    return render_template('signup.html')
+
+#=======================
+# FORGOTPASSWORD ROUTE
+#=======================
+
+@app.route('/forgotpass', methods = ['GET','POST'])
+def forgotpass():
+
+    if request.method == 'POST':
+        user_email = request.form.get('email')
+
+        existing_user = User.query.filter_by(email= user_email).first()
+
+        if not existing_user:
+            return jsonify({
+                'status':'error',
+                'message': 'E-mail ou telefone não registrado'
+            })
+        else:
+            return jsonify({
+                'status':'success'
+            })
+    return render_template('forgotpass.html')
 
 #=================
 # HOMEPAGE SCREEN 
 #=================
 
-@app.route("/main.html", methods = ['GET','POST'])
+@app.route("/main", methods = ['GET','POST'])
 def homepage():
 
-    #-- Gathering all the patients from the table --#
-    patients = Patient.query.all()
+    #-------- Gathering all the patients from the tabler related to the user -------
+
+    user_email = session.get('user_email')
+
+    if not user_email :
+        return redirect(url_for('login')) # If the user does not exist, redirect it imediately to the login page
+    
+    
+    user = User.query.filter_by(email= user_email).first()
+    username = user.username
+
+    patients = Patient.query.filter_by(user_email = user_email).all()
     
     incomes = [ pt.income for pt in patients if pt.income is not None]
     
@@ -82,13 +145,19 @@ def homepage():
     total_revenue = str(0)
     month_revenue = str(0)
  
-    num_patients = (Patient.query.count())
+    num_patients = Patient.query.filter_by(user_email = user_email).count()
 
     if num_patients > 0:
 
         # Getting data from the patients morality
-        surgeries = Patient.query.filter(Patient.modality.ilike('%Cirurgia%')).count()
-        consults = Patient.query.filter(Patient.modality.ilike('%Consulta%')).count()
+        surgeries = Patient.query.filter(
+            Patient.user_email == user_email,
+            Patient.modality.ilike('%Cirurgia%')
+            ).count()
+        consults = Patient.query.filter(
+            Patient.user_email == user_email,
+            Patient.modality.ilike('%Consulta%')
+            ).count()
 
         # Getting data referent to the financial balance from the clinic itself
 
@@ -102,6 +171,7 @@ def homepage():
 
         month_revenue = (
             db.session.query( db.func.sum(Patient.income))
+            .filter(Patient.user_email == user_email)
             .filter(db.extract('year',Patient.created_at) == now.year)
             .filter(db.extract('month',Patient.created_at) == now.month)
         ).scalar() or 0 
@@ -122,6 +192,7 @@ def homepage():
             total_revenue = total_revenue,
             mean_revenue = mean_revenue,
             month_revenue = month_revenue,
+            username = username
             )
 
 
@@ -133,7 +204,9 @@ def homepage():
 @app.route('/api/age-distribution')
 def ageDistribution():
 
-    ages = [ pt.age for pt in Patient.query.all() if pt.age is not None] # Fetching all the ages from the patients data
+    user_email = session.get('user_email')
+
+    ages = [ pt.age for pt in Patient.query.filter_by(user_email = user_email).all() if pt.age is not None] # Fetching all the ages from the patients data
    
     # Defining bins in a dict to store the intervals of the patients ages
 
@@ -166,7 +239,9 @@ def ageDistribution():
 @app.route('/api/status-distribution')
 def statusRelation():
 
-    patients = Patient.query.all()
+    user_email = session.get('user_email')
+
+    patients = Patient.query.filter_by( user_email = user_email ).all() # Gathering the patients by their user
 
     confirmed = sum(1 for pt in patients if pt.status.lower()== 'confirmado')
     standby = sum (1 for pt in patients if pt.status.lower() == 'pendente')
@@ -180,8 +255,10 @@ def statusRelation():
 @app.route('/api/gender-distribution')
 def genderDistribution():
 
-    women = sum(1 for pt in Patient.query.all() if pt.gender.lower() == 'feminino')
-    men = sum(1 for pt in Patient.query.all() if pt.gender.lower() == 'masculino')
+    user_email = session.get('user_email')
+
+    women = sum(1 for pt in Patient.query.filter_by(user_email = user_email).all() if pt.gender.lower() == 'feminino')
+    men = sum(1 for pt in Patient.query.filter_by(user_email = user_email).all() if pt.gender.lower() == 'masculino')
 
     return jsonify({ 'labels': ['Feminino','Masculino'],
                     'values': [ women , men ]
@@ -273,7 +350,8 @@ def current_predicted_revenue():
 @app.route('/api/service-distribution')
 def serviceRelation():
 
-    patients = Patient.query.all() # Selecting all the patients 
+    user_email = session.get('user_email')
+    patients = Patient.query.filter_by(user_email = user_email).all()  # Selecting all the patients 
 
     service_counts = Counter( pt.service.lower() for pt in patients )
 
@@ -289,7 +367,11 @@ def serviceRelation():
 @app.route("/add_patient", methods = ['POST','GET'])
 def add_patient():
 
+    user_email = session.get('user_email')
+    if not user_email : return jsonify({'status':'error','message':'Usúario não identificado'})
+
     if request.method == 'POST':
+
         form_data = request.form.to_dict()
         # Getting specific data from the template formulary
         cpf = form_data.get('cpf')
@@ -297,8 +379,8 @@ def add_patient():
 
         if not cpf or len(cpf) != 11: return jsonify({'status':'error','message':'CPF inválido(precisa ter 11 digítos)'})
 
-        patient_cpf = Patient.query.filter_by(cpf = cpf).first() 
-        patient_name = Patient.query.filter_by(name = name).first()
+        patient_cpf = Patient.query.filter_by(cpf = cpf,user_email = user_email).first() 
+        patient_name = Patient.query.filter_by(name = name, user_email = user_email).first()
 
         # Making the verification to see if the patient already exists in the Database by eitther using its name or cpf(primary key identification)
         if patient_cpf or patient_name:
@@ -311,7 +393,7 @@ def add_patient():
                 if schedule_date_str :
                     schedule_date = datetime.strptime(schedule_date_str,'%Y-%m-%d').date()
 
-                new_patient = Patient(**form_data, schedule_date = schedule_date)
+                new_patient = Patient(**form_data, schedule_date = schedule_date,user_email = user_email)
                 db.session.add(new_patient)
                 db.session.commit()
 
@@ -332,37 +414,42 @@ def add_patient():
 
 @app.route('/search_patient', methods = ['GET'])
 def search_patient():
+    
+    user_email = session.get('user_email')
     query = request.args.get('q','').strip()
 
+    if not user_email: return jsonify([])
 
-    if not query: 
-        patients = Patient.query.all()
+    patients_query = Patient.query.filter_by(user_email = user_email)
 
-    patients = Patient.query.filter(
-        or_(
-            Patient.cpf.ilike(f'%{query}%'),
-            Patient.name.ilike(f'%{query}%')
-        )
-    ).all()
+    if query: 
 
-    if patients:
-        # Gathering the data from the patient to set upon the patient card
+        patients_query = patients_query.filter(
+            or_(
+                Patient.cpf.ilike(f'%{query}%'),
+                Patient.name.ilike(f'%{query}%')
+            )
+            )
+        
+    patients = patients_query.all()
 
-       return jsonify([{
-           'cpf': pt.cpf,
-           'name': pt.name,
-           'modality': pt.modality,
-           'status': pt.status,
-           'age': pt.age,
-           'service': pt.service,
-           'income': pt.income,
-           'gender': pt.gender,
-           'schedule_date': pt.schedule_date.isoformat() if pt.schedule_date else None,
-           'created_at': pt.created_at.isoformat() if pt.created_at else None
-       } for pt in patients])
+    if not patients:
+        return jsonify([])
+
+    return jsonify([{
+        'cpf': pt.cpf,
+        'name': pt.name,
+        'modality': pt.modality,
+        'status': pt.status,
+        'age': pt.age,
+        'service': pt.service,
+        'income': pt.income,
+        'gender': pt.gender,
+        'schedule_date': pt.schedule_date.isoformat() if pt.schedule_date else None,
+        'created_at': pt.created_at.isoformat() if pt.created_at else None
+    } for pt in patients]) # looping through patients to send each piece of data from the patients right away
     
-    else :
-        return  jsonify({'status':'error','message':'Paciente não encontrado '}), 404
+
     
 
 #=========================
@@ -370,8 +457,10 @@ def search_patient():
 #=========================
 @app.route('/update/<cpf>' ,  methods = ['POST','GET'])
 def update(cpf):
+
+    user_email = session.get('user_email')
     
-    patient = Patient.query.get_or_404(cpf)
+    patient = Patient.query.filter_by(cpf = cpf , user_email = user_email).first_or_404()
     if request.method == 'POST':
 
         data = request.form.to_dict()
@@ -397,8 +486,11 @@ def update(cpf):
 
 @app.route("/delete/<cpf>", methods =['POST','GET'])
 def delete(cpf):
+
+    user_email = session.get('user_email')
+
     try:
-        patient = db.session.query(Patient).filter_by(cpf=str(cpf)).first()
+        patient = Patient.query.filter_by(cpf = cpf, user_email = user_email).first_or_404()
         if patient:
             db.session.delete(patient)
             db.session.commit()

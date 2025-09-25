@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDr-Cadastro</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <main class="flex flex-col items-center justify-center mt-[50px]">
+        <div class="flex flex-row items-center justify-center gap-[100px]">
+            <!-- Header section for the signup page -->
+            <img src="{{ url_for('static', filename='assets/logo.png' )}}" alt="" class="w-[200px] h-[200px]">
+            <h1 class="font-bold text-blue-600 text-[40px]">Cadastro</h1>
+
+        </div>
+
+        <!-- Container for user sign-up submission -->
+        <div class="w-[600px] h-[600px] shadow-md border-2 rounded-[10px] mt-[25px]" >
+            <div class="flex flex-row items-start align-start border-b-2">
+                <h2 class="font-bold text-blue-600 p-[20px] text-[20px]"> Junte-se ao nosso time.</h2>
+            </div>
+
+            <form action="{{ url_for('signup') }}" class="flex flex-col items-center justify-center mt-[30px] gap-[20px]" id="addUserform">
+                <!-- Form witht the user data -->
+                <input type="text" placeholder="Digite o seu e-mail" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" name="email" required>
+                <input type="text" placeholder="Digite qual será seu nome de usuário" name="username" class="border-2 p-[10px] rounded-[10px] shadow-md w-[500px]" required>
+                <input type="text" placeholder="Digite seu telefone" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" name="phone" required>
+                <input type="text" placeholder="Digite sua senha para acesso" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" name="password" required>
+                <input type="password" placeholder="Confirme sua senha" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" required>
+                
+                <div class="flex flex-row items-center justify-center gap-[300px] mt-[15px]">
+                    <a href="/" class="border-2 border-blue-600 p-[10px] font-bold rounded-[10px] text-blue-600"> <- Login </a>
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to to-blue-900 p-[10px] rounded-[10px] text-white">Cadastrar-se</button>
+                </div>
+                <!-- Showing the verification message -->
+                <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
+            </form>
+        </div>
+    </main>
+</body>
+<script>
+    // Making the Javascript code to react with the Sign up DOM
+
+
+    // -------------- Adding user ---------------
+
+    const userForm = document.getElementById('addUserform')
+    const verification = document.getElementById('verificationMessage')
+
+
+    userForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        
+        const formData = new FormData(userForm)
+        const data = Object.fromEntries(formData.entries())
+
+        try{
+
+            const response = await fetch('/signup',{
+                method:'POST',
+                body: new URLSearchParams(data)
+            });
+
+            const result = await response.json()
+
+            if( result.status === 'error'){
+                verification.textContent = result.message // Showing message if the user already exist in our database
+            }
+            else if( result.status === 'success'){
+                setTimeout(() => {
+                    window.location.href = '/'
+                }, 1000);
+            }
+        
+        } catch (err){
+            console.log(err)
+            verification.textContent = 'Erro ao adicionar conta' // Shwoing failur message
+
+        }
+    })
+
+    
+</script>
+
+</html>

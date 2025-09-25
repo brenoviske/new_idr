@@ -20,7 +20,10 @@
 
             <div class="nav-left flex flex-row items-center justify-center gap-[20px]">
                 <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="w-[50px] h-[50px]">
-                <p class="font-lighter text-[20px] text-blue-600 font-mono">Bem-Vindo,Imersa</p>
+
+                {% if username %}
+                <p class="font-lighter text-[20px] text-blue-600 font-mono">Bem-Vindo,{{ username }}</p>
+                {% endif %}
             </div>
 
             <!-- Right container from the navegation bar -->
@@ -29,6 +32,7 @@
                 <a href="#patientSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Pacientes</a>
                 <a href="#dashboardSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Visão Geral</a>
                 <a href="#financialSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Financeiro</a>
+                <a href="/" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Login</a>
             </div>
         </nav>
     </header>

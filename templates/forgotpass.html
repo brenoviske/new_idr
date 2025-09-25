@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDr-Esqueceu sua senha</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <main class="flex flex-col items-center justify-center">
+        <!-- Forgot Password -->
+        <div class="flex flex-row items-center justify-center gap-[50px]">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="h-[200px] w-[200px]">
+            <h1 class="font-bold text-blue-600 text-[40px]">Recuperação <br> de Senha</h1>
+        </div>
+        <!-- Container to password retrieve -->
+        <section class="w-[600px] h-[300px] shadow-md rounded-[10px] border-2">
+            <div class="flex flex-row items-start justify-start border-b-2">
+                <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Enviaremos uma mensagem ao seu e-mail ou telefone</h2>
+            </div>
+            <form action="{{ url_for('forgotpass') }}" class="flex flex-col items-center justify-center mt-[30px]" id="forgotForm" >
+                <input type="text" placeholder="Informe seu e-mail ou telefone cadastrado" class="w-[500px] shadow-md p-[10px] border-2 rounded-[10px]" name="email">
+                <div class="flex flex-row items-center justify-center mt-[20px] gap-[300px]">
+                    <a href="/" class="border-2 border-blue-600 font-bold rounded-[10px] p-[10px] text-blue-600"> <- Login </a>
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px] w-[100px]">Enviar</button>
+                </div>
+                <!-- Displaying verification message to see if the user really exist in our database -->
+                <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
+            </form>
+
+        </section>
+    </main>
+</body>
+<script>
+
+    // Making the Javascript code for the frontend from the forgotpass screen
+
+    // -------------- Making the login on the web-site --------------
+
+    const loginForm = document.getElementById('forgotForm')
+    const verificationMessage = document.getElementById('verificationMessage')
+
+    loginForm.addEventListener('submit', async e =>{
+        e.preventDefault()
+        
+        const formdata = new FormData(loginForm)
+        const data = Object.fromEntries(formdata.entries())
+
+        try{
+            const response = await fetch('/forgotpass',{
+                method : 'POST',
+                body : new URLSearchParams(data)
+                
+            });
+            
+            const result = await response.json()
+
+            if ( result.status === 'error'){
+                verificationMessage.textContent = result.message
+            }
+            else if( result.status === 'success'){
+                setTimeout(() => {
+                    window.location.href = '/'
+                }, 1000);
+            }
+            
+        } catch( err ){
+            console.log(err)
+            verificationMessage.textContent = 'Houve algum erro, aguarde por favor.'
+        }
+    })
+
+</script>
+</html>
