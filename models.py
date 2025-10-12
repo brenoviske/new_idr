@@ -8,6 +8,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     email = db.Column( db.String(200), nullable = False, primary_key = True)
+    full_name = db.Column(db.String(200), nullable = False)
     username = db.Column( db.String(200), nullable = False) 
     phone = db.Column(db.String(200), nullable = False)
     password = db.Column(db.String(128), nullable = False)
@@ -19,7 +20,10 @@ class User(db.Model):
     def to_dict(self):
         return {
             'e-mail':self.email,
+            'full_name' : self.full_name,
+            'username': self.username,
             'phone': self.phone
+            
         }
 
 
