@@ -18,10 +18,8 @@ from extensions import db
 from dotenv import load_dotenv # Loading the variables from the .env file
 import os 
 
-load_dotenv()
+load_dotenv() # Now gathering the variable enviroments
 
-ADMIN_USER = os.environ.get('ADMIN_USER')
-ADMIN_PASS = os.environ.get('ADMIN_PASSWORD')
 
 DB_USER = os.environ.get('DB_USER')
 DB_PASS = os.environ.get('DB_PASSWORD')
@@ -36,7 +34,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'dev_secret_key') # Fallback para dev
 #====================================
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:Ivimorcega1@localhost:3306/IMERSA' # Creating the database and linking eith the enviroment keys
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}' # Creating the database and linking eith the enviroment keys
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 
