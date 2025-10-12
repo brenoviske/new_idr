@@ -42,6 +42,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 
 db.init_app(app)
 
+
 #===============
 # LOGIN SCREEN
 #===============
@@ -56,7 +57,7 @@ def login():
         else:
             session['user_email'] = existing_user.email
             return jsonify({'status':'success'})
-    return render_template('index.html')
+    return render_template('login.html')
 
 
 #======================
@@ -511,4 +512,3 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug = True, host='127.0.0.1', port=5000)
-    

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDr-Login</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/logo.png')}}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-0 m-0 bg-white">
+    <main class="grid grid-cols-[50%_50%] h-screen">
+        <section class="bg-gradient-to-r from-blue-600 to-blue-900 flex flex-col items-center justify-center rounded-r-[10px]">
+        </section>
+        <section class="flex flex-col items-center justify-center rounded-l-[10px]">
+            <img src="{{ url_for('static', filename='assets/logo.png')}}" class="h-[200px] w-[200px]" alt="">
+            <!-- Login container inside this section -->
+             <div class="flex flex-col items-center justify-center border-2 rounded-[10px] shadow-md w-[500px] h-[500px] ">
+                <h2 class="text-blue-600 font-bold text-[30px] pb-[50px]">Login</h2>
+                <!-- Making the formulary to send the login data to the backend -->
+                <form action="/" id="loginForm"  class="flex flex-col items-center justify-center gap-[20px] mt-[20px]">
+                    <input type="text" placeholder="Digite seu email de cadastro" name="email"  class="w-[400px] p-[10px] align-start shadow-md rounded-[10px] border-2 border-blue-800" required>
+                    <input type="password" placeholder="Digite sua senha" name="password"  class="w-[400px] p-[10px] align-start shadow-md rounded-[10px] border-2 border-blue-800" required>
+                    <button type="submit" class="w-[400px] bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold p-[10px]">Login</button>
+                    
+                    <!-- Displaying credentials -->
+                    
+                    <p id="verificationMessage" class="font-bold text-red-600 text-[20px]"></p>
+
+                    <!-- Sign up and forgot password container-->
+                     <div class="flex flex-row items-center justify-center gap-[100px]">
+                        <a href="/signup" class="border-2 p-[10px] border-2 border-blue-600 rounded-[10px] text-blue-600 font-bold">Cadastrar-se</a>
+                        <a href="/forgotpass" class="font-bold text-blue-600 font-bold">Esqueceu sua senha?</a>
+                     </div>
+                </form>
+             </div>
+        </section>
+    </main>
+</body>
+
+<script>
+    
+    // ------------ Entering in the application ---------------------
+
+    const loginForm = document.getElementById('loginForm')
+    const verificationMessage = document.getElementById('verificationMessage')
+
+    loginForm.addEventListener('submit', async e => {
+        e.preventDefault() // Preventing unexpected behavior 
+
+        const form = new FormData(loginForm)
+        const data = Object.fromEntries(form.entries())
+
+        try{
+
+            const response = await fetch('/', {
+                method : 'POST',
+                body : new URLSearchParams(data)
+            })
+
+            const result = await response.json()
+
+            // Making the if statement in case that the user could not be found
+            
+            if(result.status === 'error'){
+                // Now updating the HTML element
+                verificationMessage.textContent = result.message
+            }
+            else if ( result.status === 'success'){
+                setTimeout(() => {
+                    window.location.href = '/main'
+                }, 500);
+            }
+            
+        }catch(err){
+            console.log(err);
+            verificationMessage.textContent = 'Erro ao encontrar sua conta'
+        }
+    })
+
+</script>
+</html>

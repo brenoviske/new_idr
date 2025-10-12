@@ -28,8 +28,8 @@
                 <input type="text" placeholder="Digite qual será seu nome de usuário" name="username" class="border-2 p-[10px] rounded-[10px] shadow-md w-[500px]" required>
                 <input type="text" placeholder="Digite seu telefone" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" name="phone" required>
                 <input type="text" placeholder="Digite sua senha para acesso" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" name="password" required>
-                <input type="password" placeholder="Confirme sua senha" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" required>
-                
+                <input type="password" placeholder="Confirme sua senha" id="confirmPassword" class="border-2 p-[10px] rounded-[10px] w-[500px] shadow-md" required>
+
                 <div class="flex flex-row items-center justify-center gap-[300px] mt-[15px]">
                     <a href="/" class="border-2 border-blue-600 p-[10px] font-bold rounded-[10px] text-blue-600"> <- Login </a>
                     <button type="submit" class="bg-gradient-to-r from-blue-600 to to-blue-900 p-[10px] rounded-[10px] text-white">Cadastrar-se</button>
@@ -41,46 +41,58 @@
     </main>
 </body>
 <script>
-    // Making the Javascript code to react with the Sign up DOM
-
-
-    // -------------- Adding user ---------------
-
-    const userForm = document.getElementById('addUserform')
-    const verification = document.getElementById('verificationMessage')
-
+    // Handling the form submission with JavaScript Fetch API
+    const userForm = document.getElementById('addUserform');
+    const verification = document.getElementById('verificationMessage');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
 
     userForm.addEventListener('submit', async e => {
         e.preventDefault();
-        
-        const formData = new FormData(userForm)
-        const data = Object.fromEntries(formData.entries())
 
-        try{
+        const formData = new FormData(userForm);
+        const data = Object.fromEntries(formData.entries());
 
-            const response = await fetch('/signup',{
-                method:'POST',
+        // ✅ Check if passwords match before sending the request
+        const password = data.password;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (password !== confirmPassword) {
+            verification.textContent = 'As senhas não coincidem.'; // “Passwords do not match.”
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+            return; // Stop here — don’t send request
+        }
+
+        try {
+            const response = await fetch('/signup', {
+                method: 'POST',
                 body: new URLSearchParams(data)
             });
 
-            const result = await response.json()
+            const result = await response.json();
 
-            if( result.status === 'error'){
-                verification.textContent = result.message // Showing message if the user already exist in our database
-            }
-            else if( result.status === 'success'){
+            if (result.status === 'error') {
+                verification.textContent = result.message; // User already exists, etc.
+                verification.classList.remove('text-green-600');
+                verification.classList.add('text-red-600');
+            } 
+            else if (result.status === 'success') {
+                verification.textContent = 'Conta criada com sucesso!';
+                verification.classList.remove('text-red-600');
+                verification.classList.add('text-green-600');
+
                 setTimeout(() => {
-                    window.location.href = '/'
+                    window.location.href = '/'; // Redirect to login page after 1 second
                 }, 1000);
             }
-        
-        } catch (err){
-            console.log(err)
-            verification.textContent = 'Erro ao adicionar conta' // Shwoing failur message
 
+        } catch (err) {
+            console.error(err);
+            verification.textContent = 'Erro ao adicionar conta.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
         }
-    })
-
+    });
     
 </script>
 
