@@ -43,58 +43,92 @@
     </main>
 </body>
 <script>
-    // Handling the form submission with JavaScript Fetch API
-    const userForm = document.getElementById('addUserform');
+
+    // ------------ Signup Form Handling -----------------
+    const signupForm = document.getElementById('addUserform');
     const verification = document.getElementById('verificationMessage');
     const confirmPasswordInput = document.getElementById('confirmPassword');
 
-    userForm.addEventListener('submit', async e => {
+    signupForm.addEventListener('submit', async e => {
         e.preventDefault();
 
-        const formData = new FormData(userForm);
+        // Obter dados do formulário
+        const formData = new FormData(signupForm);
         const data = Object.fromEntries(formData.entries());
 
-        // ✅ Check if passwords match before sending the request
-        const password = data.password;
-        const confirmPassword = confirmPasswordInput.value;
-
-        if (password !== confirmPassword) {
-            verification.textContent = 'As senhas não coincidem.'; // “Passwords do not match.”
+        // ✅ Checar se senhas coincidem
+        if (data.password !== confirmPasswordInput.value) {
+            verification.textContent = 'As senhas não coincidem.';
             verification.classList.remove('text-green-600');
             verification.classList.add('text-red-600');
-            return; // Stop here — don’t send request
+            return;
         }
 
+        // Checagem mínima de email e senha antes de enviar
+        if (!data.email || !data.password) {
+            verification.textContent = 'Email e senha são obrigatórios.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+            return;
+        }
+
+        if (data.password.length < 6) {
+            verification.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+            return;
+        }
+
+        // Enviar dados para o servidor
         try {
             const response = await fetch('/signup', {
                 method: 'POST',
                 body: new URLSearchParams(data)
             });
 
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+        } catch {
+            // Caso o backend não retorne JSON válido
+            verification.textContent = 'Erro inesperado do servidor.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+            return;
+        }
 
-            if (result.status === 'error') {
-                verification.textContent = result.message; // User already exists, etc.
-                verification.classList.remove('text-green-600');
-                verification.classList.add('text-red-600');
-            } 
-            else if (result.status === 'success') {
-                verification.textContent = 'Conta criada com sucesso!';
-                verification.classList.remove('text-red-600');
-                verification.classList.add('text-green-600');
-
-                setTimeout(() => {
-                    window.location.href = '/'; // Redirect to login page after 1 second
-                }, 1000);
-            }
-
-        } catch (err) {
-            console.error(err);
-            verification.textContent = 'Erro ao adicionar conta.';
+        // ✅ Tratar diferentes respostas do backend
+        if (response.status === 200 && result.status === 'success') {
+            verification.textContent = 'Conta criada com sucesso!';
+            verification.classList.remove('text-red-600');
+            verification.classList.add('text-green-600');
+            setTimeout(() => window.location.href = '/', 1000);
+        } else if (response.status === 400) {
+            verification.textContent = result.message || 'Dados inválidos.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+        } else if (response.status === 409) {
+            verification.textContent = result.message || 'Usuário já existente.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+        } else if (response.status === 500) {
+            verification.textContent = 'Erro interno do servidor.';
+            verification.classList.remove('text-green-600');
+            verification.classList.add('text-red-600');
+        } else {
+            verification.textContent = result.message || 'Erro desconhecido.';
             verification.classList.remove('text-green-600');
             verification.classList.add('text-red-600');
         }
-    });
+
+    } catch (err) {
+        // Falha de rede ou outros erros
+        console.error(err);
+        verification.textContent = 'Não foi possível conectar ao servidor.';
+        verification.classList.remove('text-green-600');
+        verification.classList.add('text-red-600');
+    }
+});
     
 </script>
 

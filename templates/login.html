@@ -45,43 +45,51 @@
 
 <script>
     
-    // ------------ Entering in the application ---------------------
+  // ------------ Login AJAX ---------------------
 
-    const loginForm = document.getElementById('loginForm')
-    const verificationMessage = document.getElementById('verificationMessage')
+    const loginForm = document.getElementById('loginForm');
+    const verificationMessage = document.getElementById('verificationMessage');
+    const loginButton = loginForm.querySelector('button[type="submit"]');
 
-    loginForm.addEventListener('submit', async e => {
-        e.preventDefault() // Preventing unexpected behavior 
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevines comportamento padrão do form
 
-        const form = new FormData(loginForm)
-        const data = Object.fromEntries(form.entries())
+    // Desabilita botão para evitar múltiplos envios
+        loginButton.disabled = true;
+        verificationMessage.textContent = '';
+        verificationMessage.style.color = 'black';
 
-        try{
+        const formData = new FormData(loginForm);
+        const data = Object.fromEntries(formData.entries());
 
+        try {
             const response = await fetch('/', {
-                method : 'POST',
-                body : new URLSearchParams(data)
-            })
+                method: 'POST',
+                body: new URLSearchParams(data),
+            });
 
-            const result = await response.json()
+            const result = await response.json();
 
-            // Making the if statement in case that the user could not be found
-            
-            if(result.status === 'error'){
-                // Now updating the HTML element
-                verificationMessage.textContent = result.message
-            }
-            else if ( result.status === 'success'){
+            if (result.status === 'success') {
+                verificationMessage.textContent = 'Login bem-sucedido! Redirecionando...';
+                verificationMessage.style.color = 'green';
+            // Pequeno delay antes de redirecionar
                 setTimeout(() => {
-                    window.location.href = '/main'
-                }, 500);
+                    window.location.href = '/main';
+                }, 800);
+            } else {
+                // Caso de erro
+                verificationMessage.textContent = result.message || 'Falha no login';
+                verificationMessage.style.color = 'red';
             }
-            
-        }catch(err){
-            console.log(err);
-            verificationMessage.textContent = 'Erro ao encontrar sua conta'
+        } catch (err) {
+            console.error('Erro no fetch:', err);
+            verificationMessage.textContent = 'Erro ao tentar se conectar ao servidor.';
+            verificationMessage.style.color = 'red';
+        } finally {
+            // Reativa o botão
+            loginButton.disabled = false;
         }
-    })
-
+    });
 </script>
 </html>
