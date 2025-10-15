@@ -297,6 +297,86 @@ def genderDistribution():
     men = sum(1 for pt in Patient.query.filter_by(user_email=user_email).all() if pt.gender.lower()=='masculino')
     return jsonify({'labels':['Feminino','Masculino'],'values':[women,men]})
 
+#=================
+# MONTHLY REVENUE 
+#=================
+
+@app.route("/api/monthly-revenue")
+@login_required
+def monthly_revenue():
+
+    now = datetime.utcnow()
+    month_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] # Making the 
+    monthly_revenues = []
+
+
+    for month in range(1,13,1):
+        total = (
+            db.session.query(db.func.sum(Patient.income))
+            .filter(db.extract('year', Patient.created_at) == now.year)
+            .filter(db.extract('month',Patient.created_at) == month)
+        ).scalar() or 0
+
+        monthly_revenues.append( float(total))
+
+    return jsonify({'labels': month_labels,
+                    'values':monthly_revenues,
+    })
+
+#==========================
+# AI PREDICTION OUTCOMES
+#==========================
+
+@app.route('/api/current-predicted-revenue')
+@login_required
+def current_predicted_revenue():
+    
+    now = datetime.utcnow()
+    current_month = now.month
+
+    current_revenue = (
+        db.session.query(db.func.sum(Patient.income))
+        .filter(db.extract('year',Patient.created_at) == now.year)
+        .filter(db.extract('month',Patient.created_at) == current_month)
+    ).scalar() or 0
+
+    current_revenue = float(current_revenue)
+
+    # Prepare data for prediction ( train on past months )
+
+    past_months = []
+    revenues = []
+
+    for month in range(1, current_month+1 ):
+        
+        total = (
+            db.session.query(db.func.sum(Patient.income))
+            .filter(db.extract('year', Patient.created_at) == now.year)
+            .filter(db.extract('month', Patient.created_at) == month)
+        ).scalar() or 0
+
+        past_months.append(month)
+        revenues.append(float(total))
+
+    if len(past_months) > 1:
+        X = np.array(past_months).reshape(-1,1)
+        y = np.array(revenues)
+        model = LinearRegression().fit( X , y)
+        predicted_revenue = float(model.predict([[current_month +1]]))
+
+    else:
+        # Not enough data for prediction
+        predicted_revenue = 0.0
+    
+
+    
+    # Predict the outcome from the next month analyzing the data already avaiable
+
+    return jsonify({
+        'labels': ['Mês Atual','Próximo mês(Previsão Financeira)'],
+        'values': [current_revenue, predicted_revenue]
+    })
+
 #============================
 # LOGOUT
 #============================
