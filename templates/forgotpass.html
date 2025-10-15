@@ -7,31 +7,37 @@
     <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <main class="flex flex-col items-center justify-center">
+<body class="bg-gray-50 min-h-screen">
+    <main class="flex flex-col items-center justify-center p-4 sm:p-8">
         <!-- Forgot Password -->
-        <div class="flex flex-row items-center justify-center gap-[50px]">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="h-[200px] w-[200px]">
-            <h1 class="font-bold text-blue-600 text-[40px]">Recuperação <br> de Senha</h1>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-[50px] text-center sm:text-left">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="h-[120px] w-[120px] sm:h-[200px] sm:w-[200px]">
+            <h1 class="font-bold text-blue-600 text-[28px] sm:text-[40px] leading-tight">Recuperação <br> de Senha</h1>
         </div>
-        <!-- Container to password retrieve -->
-        <section class="w-[600px] h-[300px] shadow-md rounded-[10px] border-2">
-            <div class="flex flex-row items-start justify-start border-b-2">
-                <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Enviaremos uma mensagem ao seu e-mail ou telefone</h2>
-            </div>
-            <form action="{{ url_for('forgotpass') }}" class="flex flex-col items-center justify-center mt-[30px]" id="forgotForm" >
-                <input type="text" placeholder="Informe seu e-mail ou telefone cadastrado" class="w-[500px] shadow-md p-[10px] border-2 rounded-[10px]" name="email">
-                <div class="flex flex-row items-center justify-center mt-[20px] gap-[300px]">
-                    <a href="/" class="border-2 border-blue-600 font-bold rounded-[10px] p-[10px] text-blue-600"> <- Login </a>
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px] w-[100px]">Enviar</button>
-                </div>
-                <!-- Displaying verification message to see if the user really exist in our database -->
-                <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
-            </form>
 
+        <!-- Container to password retrieve -->
+        <section class="w-full max-w-[600px] h-auto sm:h-[300px] shadow-md rounded-[10px] border-2 mt-6 bg-white">
+            <div class="flex flex-row items-start justify-start border-b-2">
+                <h2 class="font-bold text-blue-600 text-[16px] sm:text-[20px] p-[15px] sm:p-[20px] leading-tight">
+                    Enviaremos uma mensagem ao seu e-mail ou telefone
+                </h2>
+            </div>
+
+            <form action="{{ url_for('forgotpass') }}" class="flex flex-col items-center justify-center mt-[20px] sm:mt-[30px]" id="forgotForm">
+                <input type="text" placeholder="Informe seu e-mail ou telefone cadastrado" class="w-[90%] sm:w-[500px] shadow-md p-[10px] border-2 rounded-[10px]" name="email">
+
+                <div class="flex flex-col sm:flex-row items-center justify-center mt-[20px] gap-4 sm:gap-[300px]">
+                    <a href="/" class="border-2 border-blue-600 font-bold rounded-[10px] p-[10px] text-blue-600 w-full sm:w-auto text-center">← Login</a>
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px] w-full sm:w-[100px]">Enviar</button>
+                </div>
+
+                <!-- Displaying verification message to see if the user really exist in our database -->
+                <p class="font-bold text-red-600 text-[16px] sm:text-[20px] mt-4 text-center" id="verificationMessage"></p>
+            </form>
         </section>
     </main>
 </body>
+</html>
 <script>
 
     // Making the Javascript code for the frontend from the forgotpass screen
