@@ -7,36 +7,37 @@
     <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <main class="flex flex-col items-center justify-center mt-[50px] pb-[50px]">
-        <div class="flex flex-row items-center justify-center gap-[100px]">
-            <!-- Header section for the signup page -->
-            <img src="{{ url_for('static', filename='assets/logo.png' )}}" alt="" class="w-[200px] h-[200px]">
-            <h1 class="font-bold text-blue-500 text-[40px]">Cadastro</h1>
+<body class="bg-white">
+    <main class="flex flex-col items-center justify-center mt-12 pb-12 px-4 sm:px-6 lg:px-8">
 
+        <!-- Header section for the signup page -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-24 mb-8">
+            <img src="{{ url_for('static', filename='assets/logo.png' )}}" alt="" class="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48">
+            <h1 class="font-bold text-blue-500 text-2xl sm:text-3xl md:text-4xl text-center md:text-left">Cadastro</h1>
         </div>
 
         <!-- Container for user sign-up submission -->
-        <div class="w-[700px] h-[650px] shadow-md  rounded-[10px] mt-[25px]" >
-            <div class="flex flex-row items-start align-start border-b-2">
-                <h2 class="font-bold text-blue-600 p-[20px] text-[20px]"> Junte-se ao nosso time.</h2>
+        <div class="w-full max-w-md md:max-w-lg lg:max-w-xl h-auto shadow-md rounded-lg mt-6 px-6 py-8">
+            <div class="flex flex-row items-start border-b-2 mb-6">
+                <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Junte-se ao nosso time.</h2>
             </div>
 
-            <form action="{{ url_for('signup') }}" class="flex flex-col items-center justify-center mt-[30px] gap-[20px]" id="addUserform">
-                <!-- Form witht the user data -->
-                <input type="text" placeholder="Digite o seu e-mail" class=" p-[10px] rounded-[10px] w-[500px] shadow-md" name="email" required>
-                <input type="text" placeholder="Digite seu nome completo" class=" p-[10px] rounded-[10px] w-[500px] shadow-md" name="full_name" required>
-                <input type="text" placeholder="Digite qual será seu nome de usuário" name="username" class=" p-[10px] rounded-[10px] shadow-md w-[500px]" required>
-                <input type="text" placeholder="Digite seu telefone" class=" p-[10px] rounded-[10px] w-[500px] shadow-md" name="phone" required>
-                <input type="text" placeholder="Digite sua senha para acesso" class=" p-[10px] rounded-[10px] w-[500px] shadow-md" name="password" required>
-                <input type="password" placeholder="Confirme sua senha" id="confirmPassword" class=" p-[10px] rounded-[10px] w-[500px] shadow-md" required>
+            <form action="{{ url_for('signup') }}" class="flex flex-col items-center justify-center gap-4" id="addUserform">
+                <!-- Form with user data -->
+                <input type="text" placeholder="Digite o seu e-mail" class="p-2 sm:p-3 rounded-lg w-full shadow-md" name="email" required>
+                <input type="text" placeholder="Digite seu nome completo" class="p-2 sm:p-3 rounded-lg w-full shadow-md" name="full_name" required>
+                <input type="text" placeholder="Digite qual será seu nome de usuário" name="username" class="p-2 sm:p-3 rounded-lg w-full shadow-md" required>
+                <input type="text" placeholder="Digite seu telefone" class="p-2 sm:p-3 rounded-lg w-full shadow-md" name="phone" required>
+                <input type="text" placeholder="Digite sua senha para acesso" class="p-2 sm:p-3 rounded-lg w-full shadow-md" name="password" required>
+                <input type="password" placeholder="Confirme sua senha" id="confirmPassword" class="p-2 sm:p-3 rounded-lg w-full shadow-md" required>
 
-                <div class="flex flex-col items-center justify-center mt-[15px] gap-[20px]">
-                    <button type="submit" class="bg-blue-500 w-[500px] p-[10px] rounded-[10px] text-white">Cadastrar-se</button>
-                    <a href="/" class="border-2 border-blue-500 p-[10px] font-bold rounded-[10px] text-blue-500 w-[500px] text-center"> Voltar à tela de login </a>
+                <div class="flex flex-col items-center justify-center mt-4 gap-4 w-full">
+                    <button type="submit" class="bg-blue-500 w-full p-2 sm:p-3 rounded-lg text-white text-base sm:text-lg">Cadastrar-se</button>
+                    <a href="/" class="border-2 border-blue-500 p-2 sm:p-3 font-bold rounded-lg text-blue-500 w-full text-center text-base sm:text-lg">Voltar à tela de login</a>
                 </div>
+
                 <!-- Showing the verification message -->
-                <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
+                <p class="font-bold text-red-600 text-base sm:text-lg mt-4" id="verificationMessage"></p>
             </form>
         </div>
     </main>
