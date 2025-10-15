@@ -355,6 +355,7 @@ def current_predicted_revenue():
         
         total = (
             db.session.query(db.func.sum(Patient.income))
+            .filter(Patient.user_email == user_email)
             .filter(db.extract('year', Patient.created_at) == now.year)
             .filter(db.extract('month', Patient.created_at) == month)
         ).scalar() or 0
