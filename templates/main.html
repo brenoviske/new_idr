@@ -46,7 +46,7 @@
     <main class="pt-[100px] sm:pt-[120px] md:pt-[140px]">
 
         <!-- Patients Section -->
-        <section id="patientSection" class="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-24 mt-10 lg:mt-20 px-4 sm:px-10">
+      <section id="patientSection" class="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-24 mt-10 lg:mt-20 px-4 sm:px-10">
             <div class="flex flex-col items-center justify-start gap-4 sm:gap-6">
                 <h1 class="text-4xl sm:text-5xl md:text-6xl text-blue-600 font-bold font-ubuntu font-mono">Pacientes</h1>
                 <p class="text-sm sm:text-base md:text-lg font-ubuntu font-bold text-center lg:text-left">
@@ -77,16 +77,18 @@
                 </form>
             </dialog>
 
-            <div class="w-full lg:w-[900px] h-[500px] border-2 rounded-lg shadow-md overflow-y-auto mt-6 lg:mt-0">
-                <div class="flex flex-col sm:flex-row items-start justify-between p-4 border-b">
-                    <h2 class="text-blue-600 text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-0">Pacientes</h2>
-                    <input type="text" placeholder="Busque paciente por CPF ou Nome" class="w-full sm:w-72 md:w-80 rounded-lg border-2 p-2" id="searchInput">
-                </div>
-                <div class="flex flex-col items-center justify-start mt-4 gap-6" id="patientsContainer">
-                  <!-- JavaScript will render automatically the patients cards -->
-                </div>
+        <div class="w-full max-w-[900px] border-2 rounded-lg shadow-md overflow-hidden mt-6 lg:mt-0">
+          <div class="flex flex-col sm:flex-row items-start justify-between p-4 border-b gap-4">
+            <h2 class="text-blue-600 text-lg sm:text-xl md:text-2xl font-bold">Pacientes</h2>
+            <input type="text" placeholder="Busque paciente por CPF ou Nome"
+               class="w-full sm:w-72 md:w-80 rounded-lg border-2 p-2" id="searchInput">
             </div>
-        </section>
+            <div class="flex flex-col items-center justify-start mt-4 gap-6" id="patientsContainer">
+              <!-- JavaScript will render automatically the patients cards -->
+            </div>
+        </div>
+
+      </section>
 
         <!-- Dashboard Section -->
         <section id="dashboardSection" class="flex flex-col items-center justify-center mt-16 sm:mt-20 bg-gray-100 p-6 sm:p-10 md:p-20 rounded-2xl">
@@ -317,79 +319,72 @@
 
   function renderPatients(patients) {
     patientsContainer.innerHTML = '';
-    if (!patients || patients.length === 0) {
-      patientsContainer.innerHTML = `<p class="text-gray-600 font-bold">Nenhum paciente encontrado</p>`;
-      return;
-    }
+      if (!patients || patients.length === 0) {
+        patientsContainer.innerHTML = `<p class="text-gray-600 font-bold">Nenhum paciente encontrado</p>`;
+        return;
+  }
 
-    patients.forEach(pt => {
-      const card = document.createElement('div');
-      card.className = 'flex flex-row items-center justify-center bg-gradient-to-r from-blue-600 to-blue-900 rounded-[10px] p-[20px] w-[850px] gap-[40px]';
-      card.innerHTML = `
-        <div class="flex flex-col items-center justify-center">
-          <p class="font-bold text-white">Nome: ${pt.name}</p>
-          <p class="font-bold text-white">CPF: ${pt.cpf}</p>
-          <p class="font-bold text-white">Modalidade: ${pt.modality || ""}</p>
-        </div>
-        <div class="flex flex-col items-center justify-center">
-          <p class="font-bold text-white">Status: ${pt.status || "Não informado"}</p>
-          <p class="font-bold text-white">Idade: ${pt.age || "Não informado"}</p>
-          <p class="font-bold text-white">Receita: R$ ${pt.income || "Não informado"}</p>
-        </div>
-        <div class="flex flex-col items-center justify-center">
-          <p class="text-white font-bold">Marcado: ${pt.schedule_date || "Não informado"}</p>
-          <p class="text-white font-bold">Serviço: ${pt.service || "Não informado"}</p>
-          <p class = 'text-white font-bold'>Sexo : ${pt.gender || 'Não informado'} </p>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-[20px]">
-          <button class="editBtn bg-white p-[10px] rounded-[10px] font-bold">Editar</button>
-          <a href="#" class="bg-gradient-to-r from-red-600 to-red-900 text-white p-[10px] rounded-[10px] deleteLink">Deletar</a>
-        </div>
-      `;
-
-      // Cria o dialog modal dinamicamente
-      
-      const updateDialog = document.createElement('dialog')
-      updateDialog.className = 'updatePatient shadow-lg rounded-[10px] w-[600px] h-[700px]'
-      updateDialog.innerHTML = `
-        <h2 class="font-bold text-[20px] p-[20px] text-blue-600">Atualizar Paciente</h2>
-        <form action="/update/${pt.cpf}" method="POST" class="flex flex-col items-center justify-center gap-[40px] mt-[40px]">
-            <input type="text" name="cpf" value="${pt.cpf || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="text" name="name" value="${pt.name || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="text" name="age" value="${pt.age || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="text" name="modality" value="${pt.modality || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="text" name="gender" value="${pt.gender || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]"
-            <input type="text" name="status" value="${pt.status || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="date" name="schedule_date" value="${pt.schedule_date || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-            <input type="text" name="income" value="${pt.income || ''}" class="w-[400px] rounded-[10px] border-2 p-[10px]">
-          <div class="flex flex-row items-center justify-center gap-[40px]">
-            <button type="button" class="closeUpdate bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Cancelar</button>
-            <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Atualizar</button>
-          </div>
-        </form>
+  patients.forEach(pt => {
+    const card = document.createElement('div');
+    card.className = 'flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-blue-600 to-blue-900 rounded-lg p-4 w-full gap-4 md:gap-6';
+    card.innerHTML = `
+      <div class="flex flex-col items-start justify-center w-full md:w-1/3">
+        <p class="font-bold text-white">Nome: ${pt.name}</p>
+        <p class="font-bold text-white">CPF: ${pt.cpf}</p>
+        <p class="font-bold text-white">Modalidade: ${pt.modality || ""}</p>
+      </div>
+      <div class="flex flex-col items-start justify-center w-full md:w-1/3">
+        <p class="font-bold text-white">Status: ${pt.status || "Não informado"}</p>
+        <p class="font-bold text-white">Idade: ${pt.age || "Não informado"}</p>
+        <p class="font-bold text-white">Receita: R$ ${pt.income || "Não informado"}</p>
+      </div>
+      <div class="flex flex-col items-start justify-center w-full md:w-1/3">
+        <p class="text-white font-bold">Marcado: ${pt.schedule_date || "Não informado"}</p>
+        <p class="text-white font-bold">Serviço: ${pt.service || "Não informado"}</p>
+        <p class="text-white font-bold">Sexo: ${pt.gender || 'Não informado'}</p>
+      </div>
+      <div class="flex flex-row md:flex-col items-center justify-center gap-2 md:gap-4 mt-2 md:mt-0">
+        <button class="editBtn bg-white p-2 md:p-3 rounded-lg font-bold">Editar</button>
+        <a href="#" class="bg-gradient-to-r from-red-600 to-red-900 text-white p-2 md:p-3 rounded-lg deleteLink">Deletar</a>
+      </div>
     `;
 
-      // Adding card and dialog modal
-      patientsContainer.appendChild(card);
-      patientsContainer.appendChild(updateDialog)
+    // Modal responsivo
+    const updateDialog = document.createElement('dialog');
+    updateDialog.className = 'updatePatient shadow-lg rounded-lg w-full max-w-md h-auto p-4';
+    updateDialog.innerHTML = `
+      <h2 class="font-bold text-2xl p-4 text-blue-600">Atualizar Paciente</h2>
+      <form action="/update/${pt.cpf}" method="POST" class="flex flex-col items-center justify-center gap-4">
+          <input type="text" name="cpf" value="${pt.cpf || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="name" value="${pt.name || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="age" value="${pt.age || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="modality" value="${pt.modality || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="gender" value="${pt.gender || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="status" value="${pt.status || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="date" name="schedule_date" value="${pt.schedule_date || ''}" class="w-full rounded-lg border-2 p-2">
+          <input type="text" name="income" value="${pt.income || ''}" class="w-full rounded-lg border-2 p-2">
+        <div class="flex flex-row md:flex-row items-center justify-center gap-4 mt-2">
+          <button type="button" class="closeUpdate bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Cancelar</button>
+          <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Atualizar</button>
+        </div>
+      </form>
+    `;
 
-      // Edit button
-      card.querySelector('.editBtn').addEventListener('click', () => {
-        updateDialog.showModal();
-      });
+    // Append card e modal
+    patientsContainer.appendChild(card);
+    patientsContainer.appendChild(updateDialog);
 
-      // Event listener para fechar modal
-      updateDialog.querySelector('.closeUpdate').addEventListener('click', () =>{
-        updateDialog.close()
-      });
+    // Edit button
+    card.querySelector('.editBtn').addEventListener('click', () => updateDialog.showModal());
+    updateDialog.querySelector('.closeUpdate').addEventListener('click', () => updateDialog.close());
 
-      // Delete button
-      card.querySelector('.deleteLink').addEventListener('click', async e => {
-        e.preventDefault();
-        await deletePatient(pt.cpf,card);
-      });
+    // Delete button
+    card.querySelector('.deleteLink').addEventListener('click', async e => {
+      e.preventDefault();
+      await deletePatient(pt.cpf, card);
     });
-  }
+  });
+}
 
 
   // -------------------- Delete Patient --------------------
