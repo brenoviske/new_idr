@@ -305,6 +305,7 @@ def genderDistribution():
 @login_required
 def monthly_revenue():
 
+    user_email = session.get('user_email') # <- Gathering the user email to adjust the revenue outcome per user
     now = datetime.utcnow()
     month_labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] # Making the 
     monthly_revenues = []
@@ -313,6 +314,7 @@ def monthly_revenue():
     for month in range(1,13,1):
         total = (
             db.session.query(db.func.sum(Patient.income))
+            .filter(Patient.user_email == user_email)
             .filter(db.extract('year', Patient.created_at) == now.year)
             .filter(db.extract('month',Patient.created_at) == month)
         ).scalar() or 0
@@ -331,11 +333,13 @@ def monthly_revenue():
 @login_required
 def current_predicted_revenue():
     
+    user_email = session.get('user_email')
     now = datetime.utcnow()
     current_month = now.month
 
     current_revenue = (
         db.session.query(db.func.sum(Patient.income))
+        .filter(Patient.user_email == user_email)
         .filter(db.extract('year',Patient.created_at) == now.year)
         .filter(db.extract('month',Patient.created_at) == current_month)
     ).scalar() or 0
