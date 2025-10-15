@@ -73,20 +73,33 @@ def login():
 def signup():
     if request.method == 'POST':
         data = request.form.to_dict()
-        email = data.get('email', '').strip().lower()
-        password = data.get('password')
 
-        if not email or not password:
-            return jsonify({'status': 'error', 'message': 'Missing email or password'}), 400
+        # Capturando apenas os campos necessários
+        email = data.get('email', '').strip().lower()
+        full_name = data.get('full_name', '').strip()
+        username = data.get('username', '').strip()
+        phone = data.get('phone', '').strip()
+        password = data.get('password', '')
+
+        # Validações básicas
+        if not email or not full_name or not username or not phone or not password:
+            return jsonify({'status': 'error', 'message': 'Todos os campos são obrigatórios.'}), 400
+        if len(password) < 6:
+            return jsonify({'status': 'error', 'message': 'A senha precisa ter pelo menos 6 caracteres.'}), 400
 
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             return jsonify({'status': 'error', 'message': 'Usuário já existente'}), 409
 
         try:
-            data['password'] = generate_password_hash(password)
-            data['email'] = email
-            new_user = User(**data)
+            # Criando o usuário somente com os campos corretos
+            new_user = User(
+                email=email,
+                full_name=full_name,
+                username=username,
+                phone=phone,
+                password=generate_password_hash(password)
+            )
             db.session.add(new_user)
             db.session.commit()
             return jsonify({'status': 'success'})
