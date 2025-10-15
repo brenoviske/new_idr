@@ -151,11 +151,17 @@ def homepage():
         # Getting data from the patients morality
         surgeries = Patient.query.filter(
             Patient.user_email == user_email,
-            Patient.modality.ilike('%Cirurgia%')
+            or_(
+                Patient.modality.ilike('%Cirurgia%'),
+                Patient.modality.ilike('%Procedimento%')
+                )
             ).count()
         consults = Patient.query.filter(
             Patient.user_email == user_email,
-            Patient.modality.ilike('%Consulta%')
+            or_(
+                Patient.modality.ilike('%Consulta%'),
+                Patient.modality.ilike('%Atendimento%')
+            )
             ).count()
 
         # Getting data referent to the financial balance from the clinic itself
