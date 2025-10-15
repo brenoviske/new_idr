@@ -11,7 +11,7 @@ class User(db.Model):
     full_name = db.Column(db.String(200), nullable = False)
     username = db.Column( db.String(200), nullable = False) 
     phone = db.Column(db.String(200), nullable = False)
-    password = db.Column(db.String(128), nullable = False)
+    password = db.Column(db.String(512), nullable = False)
     
 
     patients = db.relationship('Patient',back_populates = 'user')
