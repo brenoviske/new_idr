@@ -7,241 +7,213 @@
     <link rel="icon" href="{{ url_for('static', filename='assets/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 <body class="p-0 m-0 bg-white scroll-smooth">
-    <header class="flex flex-row items-center justify-center p-[20px] border-b-2 border-blue-600 w-full h-[50x] z-50 fixed bg-white top-0 left-0 shadow-md">
+  <header class="flex flex-row items-center justify-between p-5 border-b-2 border-blue-600 w-full z-50 fixed bg-white top-0 left-0 shadow-md">
+    <div class="flex items-center gap-4">
+        <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="w-12 h-12">
+        {% if username %}
+        <p class="font-lighter text-base sm:text-lg md:text-xl text-blue-600 font-mono">Bem-Vindo,{{ username }}</p>
+        {% endif %}
+    </div>
 
-        <!-- Navegation Bar -->
+    <!-- Hamburger button (aparece apenas em mobile) -->
+    <div class="lg:hidden">
+        <button id="hamburgerButton" class="text-blue-600 focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+    </div>
 
-        <nav class="flex flex-row justify-between items-center w-full">
+    <!-- Navbar para desktop (aparece em telas grandes) -->
+    <nav class="hidden lg:flex flex-row justify-center items-center gap-12">
+        <a href="#patientSection" class="text-blue-600 hover:scale-105 duration-500 ease-in-out text-base sm:text-lg md:text-xl hover:underline hover:decoration-blue-300 font-mono">Pacientes</a>
+        <a href="#dashboardSection" class="text-blue-600 hover:scale-105 duration-500 ease-in-out text-base sm:text-lg md:text-xl hover:underline hover:decoration-blue-300 font-mono">Visão Geral</a>
+        <a href="#financialSection" class="text-blue-600 hover:scale-105 duration-500 ease-in-out text-base sm:text-lg md:text-xl hover:underline hover:decoration-blue-300 font-mono">Financeiro</a>
+        <a href="/" class="text-blue-600 hover:scale-105 duration-500 ease-in-out text-base sm:text-lg md:text-xl hover:underline hover:decoration-blue-300 font-mono">Login</a>
+    </nav>
 
-            <!-- Left container from the navegation bar -->
+    <!-- Mobile Menu (aparece quando clica no hamburguer) -->
+    <nav id="mobileMenu" class="absolute top-full left-0 w-full bg-white border-b-2 border-blue-600 flex flex-col items-center gap-4 py-4 lg:hidden hidden">
+        <a href="#patientSection" class="text-blue-600 text-base font-mono hover:underline hover:decoration-blue-300">Pacientes</a>
+        <a href="#dashboardSection" class="text-blue-600 text-base font-mono hover:underline hover:decoration-blue-300">Visão Geral</a>
+        <a href="#financialSection" class="text-blue-600 text-base font-mono hover:underline hover:decoration-blue-300">Financeiro</a>
+        <a href="/" class="text-blue-600 text-base font-mono hover:underline hover:decoration-blue-300">Login</a>
+    </nav>
+  </header>
 
-            <div class="nav-left flex flex-row items-center justify-center gap-[20px]">
-                <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="" class="w-[50px] h-[50px]">
+    <main class="pt-[100px] sm:pt-[120px] md:pt-[140px]">
 
-                {% if username %}
-                <p class="font-lighter text-[20px] text-blue-600 font-mono">Bem-Vindo,{{ username }}</p>
-                {% endif %}
+        <!-- Patients Section -->
+        <section id="patientSection" class="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-24 mt-10 lg:mt-20 px-4 sm:px-10">
+            <div class="flex flex-col items-center justify-start gap-4 sm:gap-6">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl text-blue-600 font-bold font-ubuntu font-mono">Pacientes</h1>
+                <p class="text-sm sm:text-base md:text-lg font-ubuntu font-bold text-center lg:text-left">
+                    Adicione, edite e delete seus pacientes. <br> Os dados de seus pacientes estarão armazenados na tabela ao lado.
+                </p>
+                <button id="openDialog" class="text-white border-2 border-blue-600 font-bold font-ubuntu bg-gradient-to-r from-blue-600 to-blue-900 rounded-lg p-4 sm:p-5 hover:bg-white hover:text-blue-600 hover:from-white hover:to-white">&plus;Adicionar Paciente</button>
             </div>
 
-            <!-- Right container from the navegation bar -->
+            <dialog id="addPatient" class="rounded-lg shadow-lg w-full max-w-lg sm:max-w-xl md:max-w-2xl h-auto p-5 sm:p-10">
+                <h2 class="font-bold text-blue-600 text-lg sm:text-xl md:text-2xl">Adicionar Paciente</h2>
+                <form action="{{ url_for('add_patient') }}" method="POST" class="flex flex-col items-center justify-center gap-4 sm:gap-6 mt-5" id="addForm">
+                    <input type="text" placeholder="Digite o CPF do paciente" name="cpf" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite o sexo do paciente" name="gender" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite o status do paciente(Confirmado ou Pendente)" name="status" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite o tipo de serviço a ser realizado(Rinnoplastia,Lipoaspiração)" name="service" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="date" placeholder="Digite a data a agendar este paciente" name="schedule_date" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite a quantidade a ser paga pelo paciente" name="income" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
 
-            <div class="flex flex-row justify-center items-center gap-[60px]">
-                <a href="#patientSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Pacientes</a>
-                <a href="#dashboardSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Visão Geral</a>
-                <a href="#financialSection" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Financeiro</a>
-                <a href="/" class="text-blue-600 cursor-pointer hover:scale-[1.15] duration-[500ms] ease-in-out text-[20px] hover:underline hover:decoration-blue-300 font-mono">Login</a>
-            </div>
-        </nav>
-    </header>
-    <main>
-        <!-- Patients Sector -->
-        <section id="patientSection"  class="flex flex-row align-center justify-center gap-[100px] mt-[140px]">
-
-            <div class="flex flex-col items-center justify-start gap-[20px]">
-                <h1 class="text-[70px] text-blue-600 font-bold font-ubuntu font-mono">Pacientes</h1>
-                <p class="text-[20px] font-ubuntu font-bold">Adicione,edite e delete seus pacientes. <br> Os dados de seus pacientes estarão armazenados na tabela ao lado.</p>
-                <button id="openDialog"  class="text-white border-2 border-blue-600 font-bold font-ubuntu bg-gradient-to-r from-blue-600 to-blue-900 rounded-[10px] p-[20px] hover:bg-white hover:text-blue-600 hover:from-white hover:to-white">&plus;Adicionar Paciente</button>
-            </div>
-
-            <!-- Here it is the modal pop-up responsible for getting the adding patient form -->
-
-            <dialog id="addPatient" class=" rounded-2x1 shadow-lg w-[600px] h-[700px] p-[20px] rounded-[10px]">
-
-                <h2 class="font-bold text-blue-600 text-[25px]">Adicionar Paciente</h2>
-
-                <form action="{{ url_for('add_patient') }}" method="POST" class="flex flex-col items-center justify-center gap-[20px] mt-[40px]" id="addForm">
-                    <input type="text" placeholder="Digite o CPF do paciente" name="cpf" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite o sexo do paciente" name="gender" class="w-[500px] border-2 p-[10px] rounded-[10px]"">
-                    <input type="text" placeholder="Digite o status do paciente(Confirmado ou Pendente)" name="status" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite o tipo de serviço a ser realizado(Rinnoplastia,Lipoaspiração)" class="w-[500px] border-2 p-[10px] rounded-[10px]" name="service">
-                    <input type="date" placeholder="Digite a data a agendar este paciente" name="schedule_date" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    <input type="text" placeholder="Digite a quantidade a ser paga pelo paciente" name="income" class="w-[500px] border-2 p-[10px] rounded-[10px]">
-                    
-                    <!-- Creating the container to store the submit and the cancel button on this Dialog -->
-
-                    <div class=" flex flex-row items-center justify-center gap-[40px]">
-                        <button type="button"  id="closeDialog" type="button" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Cancelar</button>
-                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-[10px] rounded-[10px]">Adicionar</button>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10 mt-4">
+                        <button type="button" id="closeDialog" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 sm:p-3 rounded-lg w-full sm:w-auto">Cancelar</button>
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 sm:p-3 rounded-lg w-full sm:w-auto">Adicionar</button>
                     </div>
 
-                    <!-- Displaying the result inside the modal pop up after the verification is executed -->
-                    <p class="font-bold text-red-600 text-[20px]" id="verificationMessage"></p>
+                    <p class="font-bold text-red-600 text-base sm:text-lg mt-2" id="verificationMessage"></p>
                 </form>
             </dialog>
-            
-            <!-- Here is where the table patients will be located-->
 
-            <div class="w-[900px] h-[500px] border-2 rounded-[10px] shadow-md overflow-y-auto ">
-                <div class="flex flex-row items-start justify-between p-[20px] border-b  ">
-                    <h2 class="text-blue-600 text-[22px] font-bold">Pacientes</h2>
-                    <input type="text" placeholder="Busque paciente por CPF ou Nome" class="w-[300px] rounded-[10px] border-2 p-[10px]" id="searchInput">
+            <div class="w-full lg:w-[900px] h-[500px] border-2 rounded-lg shadow-md overflow-y-auto mt-6 lg:mt-0">
+                <div class="flex flex-col sm:flex-row items-start justify-between p-4 border-b">
+                    <h2 class="text-blue-600 text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-0">Pacientes</h2>
+                    <input type="text" placeholder="Busque paciente por CPF ou Nome" class="w-full sm:w-72 md:w-80 rounded-lg border-2 p-2" id="searchInput">
                 </div>
-                <div class="flex flex-col items-center justify-start mt-[20px] gap-[30px]" id="patientsContainer">
-
+                <div class="flex flex-col items-center justify-start mt-4 gap-6" id="patientsContainer">
                   <!-- JavaScript will render automatically the patients cards -->
+                </div>
             </div>
         </section>
 
-        <!--This section will be uploading the general dashboard from the clinic itself-->
-
-        <section id="dashboardSection"  class="flex flex-col items-center justify-center mt-[100px] bg-gray-100 p-[80px] rounded-[50px]">
-            <!-- Starting the general dashboard container section -->
-
-            <h2 class="text-blue-600 text-[70px] font-bold font-mono mt-[40px]">Visão Geral</h2>
-            <div class="flex flex-row items-center justify-center mt-[100px] gap-[60px]">
-                <div class="w-[300px] h-[250px] rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900  p-[20px] shadow-md duration-[500ms] hover:scale-[1.15] ease-in-out">
-                    <p class="font-bold font-ubuntu text-white text-[30px]">Pacientes</p>
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="flex flex-col items-center justify-center mt-16 sm:mt-20 bg-gray-100 p-6 sm:p-10 md:p-20 rounded-2xl">
+            <h2 class="text-blue-600 text-3xl sm:text-4xl md:text-6xl font-bold font-mono mt-4">Visão Geral</h2>
+            <div class="flex flex-col lg:flex-row items-center justify-center mt-8 sm:mt-12 gap-6 lg:gap-12 flex-wrap">
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg bg-gradient-to-r from-blue-600 to-blue-900 p-4 sm:p-5 shadow-md hover:scale-105 duration-500 ease-in-out">
+                    <p class="font-bold font-ubuntu text-white text-xl sm:text-2xl md:text-3xl">Pacientes</p>
                     {% if num_patients %}
-                        <label class="text-white text-[40px] font-bold">{{ num_patients }}</label>
+                        <label class="text-white text-3xl sm:text-4xl md:text-5xl font-bold">{{ num_patients }}</label>
                     {% endif %}
                 </div>
-                <div class=" w-[300px] h-[250px] rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
-                    <p class="font-bold font-ubuntu text-white text-[30px]">Cirurgias</p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg bg-gradient-to-r from-blue-600 to-blue-900 p-4 sm:p-5 shadow-md hover:scale-105 duration-500 ease-in-out">
+                    <p class="font-bold font-ubuntu text-white text-xl sm:text-2xl md:text-3xl">Cirurgias</p>
                     {% if surgeries %}
-                        <label class="text-white text-[40px] font-bold">{{ surgeries }}</label>
+                        <label class="text-white text-3xl sm:text-4xl md:text-5xl font-bold">{{ surgeries }}</label>
                     {% endif %}
                 </div>
-                <div class="rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] w-[300px] h-[250px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
-                    <p class="font-bold font-ubuntu text-white text-[30px]">Consultas</p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg bg-gradient-to-r from-blue-600 to-blue-900 p-4 sm:p-5 shadow-md hover:scale-105 duration-500 ease-in-out">
+                    <p class="font-bold font-ubuntu text-white text-xl sm:text-2xl md:text-3xl">Consultas</p>
                     {% if consults %}
-                        <label class="text-white text-[40px] font-bold">{{ consults }}</label>
+                        <label class="text-white text-3xl sm:text-4xl md:text-5xl font-bold">{{ consults }}</label>
                     {% endif %}
                 </div>
-                <div class=" rounded-[10px] bg-gradient-to-r from-blue-600 to-blue-900 p-[20px] w-[300px] h-[250px] shadow-md duration-[500ms] ease-in-out hover:scale-[1.15]">
-                    <p class="font-bold font-ubuntu text-white text-[30px]"> Receita Mensal </p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg bg-gradient-to-r from-blue-600 to-blue-900 p-4 sm:p-5 shadow-md hover:scale-105 duration-500 ease-in-out">
+                    <p class="font-bold font-ubuntu text-white text-xl sm:text-2xl md:text-3xl">Receita Mensal</p>
                     {% if month_revenue %}
-                        <label class="text-white text-[40px] font-bold">{{ month_revenue }}</label>
+                        <label class="text-white text-3xl sm:text-4xl md:text-5xl font-bold">{{ month_revenue }}</label>
                     {% endif %}
                 </div>
             </div>
-            <div class="flex flex-row items-center justify-center gap-[25px] mt-[50px]"> <!-- This div right here it is the flex div, that control the child elements inside of it-->
 
-                <!-- This will display information from the patients average -->
-                <div class="h-[400px] w-[400px] border-2 rounded-[10px] shadow-md border-white">
-                    <div class="flex flex-row items-start align-start border-b-2 border-white">
-                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Média de Idade</h2>
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-6 mt-6 sm:mt-10 flex-wrap">
+                <!-- Charts containers adapted for responsiveness -->
+                <div class="h-96 w-full sm:w-80 md:w-96 border-2 rounded-lg shadow-md border-white">
+                    <div class="flex flex-row items-start border-b-2 border-white">
+                        <h2 class="font-bold text-blue-600 text-base sm:text-lg md:text-xl p-4">Média de Idade</h2>
                     </div>
-                    <div class="flex justify-center items-center">
-                    <!-- Age Pie Chart -->
-                        <canvas id="ageChart" width="380" height="300" >
-                        </canvas>
+                    <div class="flex justify-center items-center p-2">
+                        <canvas id="ageChart" width="380" height="300"></canvas>
                     </div>
                 </div>
-
-                <div class="h-[400px] w-[400px] border-2 rounded-[10px] shadow-md border-white">
-                    <div class="flex flex-row border-b border-white align-start items-start">
-                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]"> Distribuição de Status </h2>
+                <div class="h-96 w-full sm:w-80 md:w-96 border-2 rounded-lg shadow-md border-white">
+                    <div class="flex flex-row border-b border-white">
+                        <h2 class="font-bold text-blue-600 text-base sm:text-lg md:text-xl p-4">Distribuição de Status</h2>
                     </div>
-
-                    <!-- Status relation Chart -->
-                    <div class="flex items-center justify-center">
-                        <canvas id="statusChart" width="380" height="300">
-                        </canvas>
+                    <div class="flex justify-center items-center p-2">
+                        <canvas id="statusChart" width="380" height="300"></canvas>
                     </div>
                 </div>
-                
-                <div class="h-[400px] h-[400px] border-2 rounded-[10px] shadow-md border-white">
-                    <div class="flex flex-row border-b border-white align-start items-start">
-                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]"> Distribuição de Serviços </h2>
+                <div class="h-96 w-full sm:w-80 md:w-96 border-2 rounded-lg shadow-md border-white">
+                    <div class="flex flex-row border-b border-white">
+                        <h2 class="font-bold text-blue-600 text-base sm:text-lg md:text-xl p-4">Distribuição de Serviços</h2>
                     </div>
-                    
-                    <div class="flex items-center justify-center">
+                    <div class="flex justify-center items-center p-2">
                         <canvas id="serviceChart" width="380" height="300"></canvas>
                     </div>
                 </div>
-
-                <div class="h-[400px] h-[400px] border-2 rounded-[10px] shadow-md border-white">
-                    <div class="flex flex-row border-b border-white align-start items-start">
-                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Distribuição por genêro</h2>
+                <div class="h-96 w-full sm:w-80 md:w-96 border-2 rounded-lg shadow-md border-white">
+                    <div class="flex flex-row border-b border-white">
+                        <h2 class="font-bold text-blue-600 text-base sm:text-lg md:text-xl p-4">Distribuição por gênero</h2>
                     </div>
-
-                    <div class="flex items-center justify-center">
-                        <canvas id="genderChart" height="300" width="380"></canvas>
+                    <div class="flex justify-center items-center p-2">
+                        <canvas id="genderChart" width="380" height="300"></canvas>
                     </div>
                 </div>
             </div>
-
         </section>
 
-        <!-- Financial Sector of the Clinic -->
-        <section id="financialSection"  class="flex flex-col items-center justify-center mt-[60px]">
-            <!-- Introducing the headertag for the financial market of the clinic -->
-            <h1 class="font-mono font-bold text-blue-600 text-[60px]">Financeiro</h1>
-            <div class="flex flex-row items-center justify-center mt-[40px] gap-[50px]">
-                <!-- Financial Indexes Section -->
-                <div class="w-[300px] h-[250px] rounded-[10px] shadow-md border-2 p-[20px] hover:scale-[1.15] duration-[500ms] ease-in-out  flex flex-col items-start justify-start  text-[30px]"> <!-- Each one of these -->
-                    <p class="font-bold text-blue-600 text-[30px]">Receita Máxima</p>
+        <!-- Financial Section -->
+        <section id="financialSection" class="flex flex-col items-center justify-center mt-16 sm:mt-20 px-4 sm:px-10">
+            <h1 class="font-mono font-bold text-blue-600 text-2xl sm:text-3xl md:text-4xl text-center">Financeiro</h1>
+            <div class="flex flex-col lg:flex-row items-center justify-center mt-6 sm:mt-10 gap-4 sm:gap-6 lg:gap-12 flex-wrap">
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+                    <p class="font-bold text-blue-600">Receita Máxima</p>
                     {% if max_revenue %}
                         <label class="font-bold text-blue-600">{{ max_revenue }}</label>
                     {% endif %}
                 </div>
-                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start  text-[30px]">
-                    <p class="font-bold text-blue-600 text-[30px]"> Receita Mínima </p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+                    <p class="font-bold text-blue-600">Receita Mínima</p>
                     {% if min_revenue %}
                         <label class="font-bold text-blue-600">{{ min_revenue }}</label>
                     {% endif %}
                 </div>
-                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start  text-[30px]">
-                    <p class="font-bold text-blue-600 text-[30px]"> Receita Média </p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+                    <p class="font-bold text-blue-600">Receita Média</p>
                     {% if mean_revenue %}
                         <label class="font-bold text-blue-600">{{ mean_revenue }}</label>
                     {% endif %}
                 </div>
-                <div class="w-[300px] h-[250px] rounded-[10px] p-[20px] border-2 shadow-md hover:scale-[1.15] duration-[500ms] ease-in-out flex flex-col items-start justify-start text-[30px]">
-                    <p class="font-bold text-blue-600 text-[30px]"> Receita Total </p>
+                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+                    <p class="font-bold text-blue-600">Receita Total</p>
                     {% if total_revenue %}
                         <label class="font-bold text-blue-600">{{ total_revenue }}</label>
                     {% endif %}
                 </div>
             </div>
-            
-            <!-- This section will display graphic informations regarding the financial balance of the clinic right here -->
-            <div class="flex flex-row items-center justify-center mt-[50px] gap-[50px]">
 
-                <div class="w-[700px] h-[500px] border-2 rounded-[10px] shadow-md"> <!--  --> 
-                    <div class="flex flex-row items-start justify-start border-b">
-                        <h2 class="font-bold text-blue-600 p-[20px] text-[20px]"> Desempenho Mensal </h2>
+            <div class="flex flex-col lg:flex-row items-center justify-center mt-6 sm:mt-10 gap-6 flex-wrap">
+                <div class="w-full sm:w-[700px] h-96 lg:h-[500px] border-2 rounded-lg shadow-md">
+                    <div class="flex flex-row items-start border-b">
+                        <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Desempenho Mensal</h2>
                     </div>
-                    <!-- Monthly Revenue Chart -->
-                    <canvas id="revenueChart" width="700" height="400"> <!-- Creating the canvas fot the Chart -->
-                    </canvas>
+                    <canvas id="revenueChart" width="700" height="400"></canvas>
                 </div>
 
-                <!-- This div will be displaying -->
-                <div class="rounded-[10px] border-2 w-[500px] h-[500px] shadow-md">
-                    <div class="flex flex-row items-start justify-start border-b">
-                        <h2 class="font-bold text-blue-600 text-[20px] p-[20px]">Previsão Mensal Eventual </h2>
+                <div class="w-full sm:w-[500px] h-96 lg:h-[500px] rounded-lg border-2 shadow-md">
+                    <div class="flex flex-row items-start border-b">
+                        <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Previsão Mensal Eventual</h2>
                     </div>
-
-                    <!-- Revenue Prediction Outcome -->
-                    <canvas id="predictionChart" width="480" height="400">
-                    </canvas>
+                    <canvas id="predictionChart" width="480" height="400"></canvas>
                 </div>
             </div>
         </section>
-        
-        <!-- Adding a footer section to the mainpage , to make it better looking -->
 
-        <footer class="bg-gradient-to-r from-blue-600 to-blue-900 w-full h-[300px] mt-[150px]">
-
-            <div class="flex flex-row items-start justify-between p-[20px] gap-[30px]">
-                
-                <div class="flex flex-col items-center justify-center p-[20px]">
-                    <p class="text-white font-lighter">Qualquer ferramenta ou imagem utilizada neste programa é de caráter ilustatrivo.</p>
-                    <p class="text-white font-lighter">Todos os dados coletados e exibidos são pertencentes aos clientes.</p>
-                    <p class="text-white font-lighter">Favor não fazer uso ou o comaprtilhamento para terceiros.</p>
+        <!-- Footer -->
+        <footer class="bg-gradient-to-r from-blue-600 to-blue-900 w-full mt-16 sm:mt-20">
+            <div class="flex flex-col md:flex-row items-start justify-between p-6 sm:p-10 gap-6 sm:gap-10">
+                <div class="flex flex-col items-center md:items-start justify-center gap-2">
+                    <p class="text-white text-sm sm:text-base">Qualquer ferramenta ou imagem utilizada neste programa é de caráter ilustrativo.</p>
+                    <p class="text-white text-sm sm:text-base">Todos os dados coletados e exibidos são pertencentes aos clientes.</p>
+                    <p class="text-white text-sm sm:text-base">Favor não fazer uso ou o compartilhamento para terceiros.</p>
                 </div>
-                <div class="flex flex-col items-center justify-center p-[20px]">
-                    <p class="text-white font-lighter">Todos os direitos reservados à @brenoviske.</p>
-                    <p class="text-white font-lighter">Contact: reisb6774@gmail.com</p>
+                <div class="flex flex-col items-center md:items-start justify-center gap-2">
+                    <p class="text-white text-sm sm:text-base">Todos os direitos reservados à @brenoviske.</p>
+                    <p class="text-white text-sm sm:text-base">Contact: reisb6774@gmail.com</p>
                 </div>
-
             </div>
         </footer>
 
@@ -253,11 +225,19 @@
   const openDialog = document.getElementById('openDialog');
   const addDialog = document.getElementById('addPatient');
   const closeDialog = document.getElementById('closeDialog');
-
   const editButtons = document.querySelectorAll('.updateDialog');
   const updateDialogs = document.querySelectorAll('.updatePatient');
   const closeButtons = document.querySelectorAll('.closeUpdate');
+  
 
+  // Script para abrir/fechar o menu mobile
+  const hamburgerButton = document.getElementById('hamburgerButton');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburgerButton.addEventListener('click', () => {
+     mobileMenu.classList.toggle('hidden');
+  });
+  
   // Open and close add patient modal
   openDialog.addEventListener('click', () => addDialog.showModal());
   closeDialog.addEventListener('click', e => {
