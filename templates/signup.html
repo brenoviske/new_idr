@@ -48,22 +48,21 @@
     const verification = document.getElementById('verificationMessage');
     const confirmPasswordInput = document.getElementById('confirmPassword');
 
-    signupForm.addEventListener('submit', async e => {
+    signupForm.addEventListener('submit', async e => {  
         e.preventDefault();
 
-        const formData = new FormData(signupForm);
-        const data = Object.fromEntries(formData.entries());
+    // Captura apenas os campos que o backend precisa
+        const data = {
+            email: signupForm.email.value.trim(),
+            full_name: signupForm.full_name.value.trim(),
+            username: signupForm.username.value.trim(),
+            phone: signupForm.phone.value.trim(),
+            password: signupForm.password.value
+        };
 
-        // Checa se senhas coincidem
+        // Validações básicas
         if (data.password !== confirmPasswordInput.value) {
             verification.textContent = 'As senhas não coincidem.';
-            verification.className = 'text-red-600';
-            verification.style.display = 'block';
-            return;
-        }
-
-        if (!data.email || !data.password) {
-            verification.textContent = 'Email e senha são obrigatórios.';
             verification.className = 'text-red-600';
             verification.style.display = 'block';
             return;
@@ -77,37 +76,34 @@
         }
 
         try {
+            // Envio seguro ao backend
             const response = await fetch('/signup', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams(data)
-            });
+            }); 
 
             const result = await response.json();
 
-            // Trata os retornos do backend
             if (result.status === 'success') {
                 verification.textContent = 'Conta criada com sucesso!';
                 verification.className = 'text-green-600';
                 verification.style.display = 'block';
-                // Redireciona após 1 segundo
                 setTimeout(() => {
-                window.location.href = '/';
+                    window.location.href = '/';
                 }, 1000);
             } else {
-                // Qualquer erro do backend
                 verification.textContent = result.message || 'Erro ao criar conta.';
                 verification.className = 'text-red-600';
                 verification.style.display = 'block';
             }
-
         } catch (err) {
             console.error(err);
             verification.textContent = 'Não foi possível conectar ao servidor.';
             verification.className = 'text-red-600';
             verification.style.display = 'block';
         }
-    });
-    
+});
 </script>
 
 </html>
