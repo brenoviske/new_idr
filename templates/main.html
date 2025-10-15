@@ -156,51 +156,65 @@
         </section>
 
         <!-- Financial Section -->
-        <section id="financialSection" class="flex flex-col items-center justify-center mt-16 sm:mt-20 px-4 sm:px-10">
-            <h1 class="font-mono font-bold text-blue-600 text-2xl sm:text-3xl md:text-4xl text-center">Financeiro</h1>
-            <div class="flex flex-col lg:flex-row items-center justify-center mt-6 sm:mt-10 gap-4 sm:gap-6 lg:gap-12 flex-wrap">
-                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
-                    <p class="font-bold text-blue-600">Receita Máxima</p>
-                    {% if max_revenue %}
-                        <label class="font-bold text-blue-600">{{ max_revenue }}</label>
-                    {% endif %}
-                </div>
-                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
-                    <p class="font-bold text-blue-600">Receita Mínima</p>
-                    {% if min_revenue %}
-                        <label class="font-bold text-blue-600">{{ min_revenue }}</label>
-                    {% endif %}
-                </div>
-                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
-                    <p class="font-bold text-blue-600">Receita Média</p>
-                    {% if mean_revenue %}
-                        <label class="font-bold text-blue-600">{{ mean_revenue }}</label>
-                    {% endif %}
-                </div>
-                <div class="w-full sm:w-64 md:w-72 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
-                    <p class="font-bold text-blue-600">Receita Total</p>
-                    {% if total_revenue %}
-                        <label class="font-bold text-blue-600">{{ total_revenue }}</label>
-                    {% endif %}
-                </div>
+<section id="financialSection" class="flex flex-col items-center justify-center mt-16 sm:mt-20 px-4 sm:px-10">
+    <h1 class="font-mono font-bold text-blue-600 text-2xl sm:text-3xl md:text-4xl text-center">Financeiro</h1>
+
+    <!-- Financial Cards -->
+    <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center mt-6 sm:mt-10 gap-4 sm:gap-6 lg:gap-12">
+        <div class="w-full sm:w-[48%] md:w-64 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+            <p class="font-bold text-blue-600">Receita Máxima</p>
+            {% if max_revenue %}
+                <label class="font-bold text-blue-600">{{ max_revenue }}</label>
+            {% endif %}
+        </div>
+
+        <div class="w-full sm:w-[48%] md:w-64 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+            <p class="font-bold text-blue-600">Receita Mínima</p>
+            {% if min_revenue %}
+                <label class="font-bold text-blue-600">{{ min_revenue }}</label>
+            {% endif %}
+        </div>
+
+        <div class="w-full sm:w-[48%] md:w-64 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+            <p class="font-bold text-blue-600">Receita Média</p>
+            {% if mean_revenue %}
+                <label class="font-bold text-blue-600">{{ mean_revenue }}</label>
+            {% endif %}
+        </div>
+
+        <div class="w-full sm:w-[48%] md:w-64 h-64 rounded-lg shadow-md border-2 p-4 hover:scale-105 duration-500 ease-in-out flex flex-col items-start justify-start text-lg sm:text-xl md:text-2xl">
+            <p class="font-bold text-blue-600">Receita Total</p>
+            {% if total_revenue %}
+                <label class="font-bold text-blue-600">{{ total_revenue }}</label>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+      <div class="flex flex-col lg:flex-row items-center justify-center mt-6 sm:mt-10 gap-6 flex-wrap w-full">
+        
+        <!-- Desempenho Mensal -->
+        <div class="w-full sm:w-[90%] lg:w-[700px] h-64 sm:h-80 lg:h-[500px] border-2 rounded-lg shadow-md">
+            <div class="flex flex-row items-start border-b">
+                <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Desempenho Mensal</h2>
+            </div>
+            <div class="w-full h-[calc(100%-48px)] p-2">
+                <canvas id="revenueChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+        <!-- Previsão Mensal Eventual -->
+          <div class="w-full sm:w-[90%] lg:w-[500px] h-64 sm:h-80 lg:h-[500px] rounded-lg border-2 shadow-md">
+              <div class="flex flex-row items-start border-b">
+                <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Previsão Mensal Eventual</h2>
+              </div>
+              <div class="w-full h-[calc(100%-48px)] p-2">
+                <canvas id="predictionChart" class="w-full h-full"></canvas>
+              </div>
             </div>
 
-            <div class="flex flex-col lg:flex-row items-center justify-center mt-6 sm:mt-10 gap-6 flex-wrap">
-                <div class="w-full sm:w-[700px] h-96 lg:h-[500px] border-2 rounded-lg shadow-md">
-                    <div class="flex flex-row items-start border-b">
-                        <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Desempenho Mensal</h2>
-                    </div>
-                    <canvas id="revenueChart" width="700" height="400"></canvas>
-                </div>
-
-                <div class="w-full sm:w-[500px] h-96 lg:h-[500px] rounded-lg border-2 shadow-md">
-                    <div class="flex flex-row items-start border-b">
-                        <h2 class="font-bold text-blue-600 p-4 text-lg sm:text-xl md:text-2xl">Previsão Mensal Eventual</h2>
-                    </div>
-                    <canvas id="predictionChart" width="480" height="400"></canvas>
-                </div>
-            </div>
-        </section>
+      </div>
+    </section>
 
         <!-- Footer -->
         <footer class="bg-gradient-to-r from-blue-600 to-blue-900 w-full mt-16 sm:mt-20">
@@ -237,7 +251,7 @@
   hamburgerButton.addEventListener('click', () => {
      mobileMenu.classList.toggle('hidden');
   });
-  
+
   // Open and close add patient modal
   openDialog.addEventListener('click', () => addDialog.showModal());
   closeDialog.addEventListener('click', e => {
