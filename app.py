@@ -280,6 +280,24 @@ def ageDistribution():
         else: bins['66+']+=1
     return jsonify({'labels': list(bins.keys()), 'values': list(bins.values())})
 
+#========================
+#SERVICE RELATION ROUTE 
+#========================
+
+@app.route('/api/service-distribution')
+def serviceRelation():
+
+    user_email = session.get('user_email')
+    patients = Patient.query.filter_by(user_email = user_email).all()  # Selecting all the patients 
+
+    service_counts = Counter( pt.service.lower() for pt in patients )
+
+    return jsonify({
+        'labels': list(service_counts.keys()),
+        'values': list(service_counts.values())
+    }) # Returning as a json format
+    
+
 @app.route('/api/status-distribution')
 @login_required
 def statusRelation():
