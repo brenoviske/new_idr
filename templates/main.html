@@ -58,12 +58,12 @@
             <dialog id="addPatient" class="rounded-lg shadow-lg w-full max-w-lg sm:max-w-xl md:max-w-2xl h-auto p-5 sm:p-10">
                 <h2 class="font-bold text-blue-600 text-lg sm:text-xl md:text-2xl">Adicionar Paciente</h2>
                 <form action="{{ url_for('add_patient') }}" method="POST" class="flex flex-col items-center justify-center gap-4 sm:gap-6 mt-5" id="addForm">
-                    <input type="text" placeholder="Digite o CPF do paciente" name="cpf" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
-                    <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
-                    <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+                    <input type="text" placeholder="Digite o CPF do paciente" name="cpf" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
+                    <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
+                    <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
 
-                    
-                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg">
+
+                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
 
                     <!-- Creating a select button for the patient status -->
                     <div class="flex flex-row items-center gap-4 w-full max-w-x1">
@@ -74,7 +74,7 @@
                           id="status"
                           name="status"
                           class="appearance-none w-full border border-gray-300 rounded-lg py-2.5 px-4 pr-10 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
+                         required>
                           <option value="" disabled selected hidden>Selecione o status</option>
                           <option value="confirmado">Confirmado</option>
                           <option value="pendente">Pendente</option>
