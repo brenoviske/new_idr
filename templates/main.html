@@ -62,8 +62,30 @@
                     <input type="text" placeholder="Digite o nome do cliente" name="name" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
                     <input type="text" placeholder="Digite a idade de seu paciente" name="age" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
 
+                    <!-- Creating a select button for the patients modality of service -->
+                    <div class="">
+                      <label for="modality" class="text-sm font-medium text-gray-700 mb-1">Modalidade de atendimento</label>
 
-                    <input type="text" placeholder="Digite a modalidade de atendimento" name="modality" class="w-full sm:w-80 md:w-96 border-2 p-2 rounded-lg" required>
+                      <div class="relative flex-1">
+                        <select
+                          id="modality"
+                          name="modality"
+                          class="appearance-none w-full border border-gray-300 rounded-lg py-2.5 px-4 pr-10 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          required>
+                          <option value="" disabled selected hidden>Selecione a modalidade</option>
+                          <option value="consulta">Consulta/Atendimento</option>
+                          <option value="procedimento">Cirurgia/Procedimento</option>
+                          
+                        </select>
+
+                        <!-- Ícone de seta -->
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
 
                     <!-- Creating a select button for the patient status -->
                     <div class="flex flex-row items-center gap-4 w-full max-w-x1">
