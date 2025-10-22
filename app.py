@@ -314,7 +314,7 @@ def genderDistribution():
     women = sum(1 for pt in Patient.query.filter_by(user_email=user_email).all() if pt.gender.lower()=='feminino')
     men = sum(1 for pt in Patient.query.filter_by(user_email=user_email).all() if pt.gender.lower()=='masculino')
     others = sum(1 for pt in Patient.query.filter_by(user_email = user_email).all() if pt.gender.lower() == 'outro')
-    return jsonify({'labels':['Feminino','Masculino'],'values':[women,men]})
+    return jsonify({'labels':['Feminino','Masculino','Outro'],'values':[women,men,others]})
 
 #=================
 # MONTHLY REVENUE 
