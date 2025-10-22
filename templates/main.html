@@ -423,22 +423,94 @@
     const updateDialog = document.createElement('dialog');
     updateDialog.className = 'updatePatient shadow-lg rounded-lg w-full max-w-md h-auto p-4';
     updateDialog.innerHTML = `
-      <h2 class="font-bold text-2xl p-4 text-blue-600">Atualizar Paciente</h2>
-      <form action="/update/${pt.cpf}" method="POST" class="flex flex-col items-center justify-center gap-4">
-          <input type="text" name="cpf" value="${pt.cpf || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="name" value="${pt.name || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="age" value="${pt.age || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="modality" value="${pt.modality || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="gender" value="${pt.gender || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="status" value="${pt.status || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="date" name="schedule_date" value="${pt.schedule_date || ''}" class="w-full rounded-lg border-2 p-2">
-          <input type="text" name="income" value="${pt.income || ''}" class="w-full rounded-lg border-2 p-2">
-        <div class="flex flex-row md:flex-row items-center justify-center gap-4 mt-2">
-          <button type="button" class="closeUpdate bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Cancelar</button>
-          <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Atualizar</button>
+    <h2 class="font-bold text-2xl p-4 text-blue-600">Atualizar Paciente</h2>
+    <form action="/update/${pt.cpf}" method="POST" class="flex flex-col items-center justify-center gap-4">
+      <input type="text" name="cpf" value="${pt.cpf || ''}" class="w-full rounded-lg border-2 p-2">
+      <input type="text" name="name" value="${pt.name || ''}" class="w-full rounded-lg border-2 p-2">
+      <input type="text" name="age" value="${pt.age || ''}" class="w-full rounded-lg border-2 p-2">
+
+      <!-- Creating a select button for the patients modality of service -->
+      <div class="flex flex-row items-center gap-2 w-full max-w-x1">
+        <label for="modality" class="text-sm font-medium text-gray-700 mb-1">Modalidade de atendimento</label>
+
+        <div class="relative flex-1">
+          <select
+              id="modality"
+              name="modality"
+              class="appearance-none w-full border border-gray-300 rounded-lg py-2.5 px-4 pr-10 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required>
+            <option value="" disabled ${!pt.modality ? 'selected' : ''} hidden>Selecione a modalidade</option>
+            <option value="consulta" ${pt.modality === 'consulta' ? 'selected' : ''}>Consulta/Atendimento</option>
+            <option value="procedimento" ${pt.modality === 'procedimento' ? 'selected' : ''}>Cirurgia/Procedimento</option>
+          </select>
+
+          <!-- Ícone de seta -->
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+            </svg>
+          </div>
         </div>
-      </form>
-    `;
+      </div>
+
+      <!-- Creating a select button for the patient status -->
+      <div class="flex flex-row items-center gap-2 w-full max-w-x1">
+        <label for="status" class="text-sm font-medium text-gray-700 mb-1">Status do paciente</label>
+
+        <div class="relative flex-1">
+          <select
+            id="status"
+            name="status"
+            class="appearance-none w-full border border-gray-300 rounded-lg py-2.5 px-4 pr-10 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required>
+            <option value="" disabled ${!pt.status ? 'selected' : ''} hidden>Selecione o status</option>
+            <option value="confirmado" ${pt.status === 'confirmado' ? 'selected' : ''}>Confirmado</option>
+            <option value="pendente" ${pt.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+          </select>
+
+          <!-- Ícone de seta -->
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Creating a select button for the patient gender -->
+      <div class="flex flex-row items-center gap-2 w-full max-w-x1">
+        <label for="gender" class="text-sm font-medium text-gray-700 mb-1">Gênero do paciente</label>
+
+        <div class="relative flex-1">
+          <select
+            id="gender"
+            name="gender"
+            class="appearance-none w-full border border-gray-300 rounded-lg py-2.5 px-4 pr-10 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required>
+            <option value="" disabled ${!pt.gender ? 'selected' : ''} hidden>Selecione o gênero</option>
+            <option value="masculino" ${pt.gender === 'masculino' ? 'selected' : ''}>Masculino</option>
+            <option value="feminino" ${pt.gender === 'feminino' ? 'selected' : ''}>Feminino</option>
+            <option value="outro" ${pt.gender === 'outro' ? 'selected' : ''}>Outro</option>
+          </select>
+
+          <!-- Ícone de seta -->
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <input type="date" name="schedule_date" value="${pt.schedule_date || ''}" class="w-full rounded-lg border-2 p-2">
+      <input type="text" name="income" value="${pt.income || ''}" class="w-full rounded-lg border-2 p-2">
+
+      <div class="flex flex-row md:flex-row items-center justify-center gap-4 mt-2">
+        <button type="button" class="closeUpdate bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Cancelar</button>
+        <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-900 text-white p-2 rounded-lg">Atualizar</button>
+      </div>
+    </form>
+`;
 
     // Append card e modal
     patientsContainer.appendChild(card);
