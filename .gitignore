@@ -1,6 +1,6 @@
 .env # Ignoring .env with variable enviroments
 env/ # Ignoring virtual enviroment
-
+backend.txt # Ignoring the old script from the backend
 
 #Cache em python 
 __pycache__/
